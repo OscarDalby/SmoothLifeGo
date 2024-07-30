@@ -46,6 +46,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func main() {
+	secondary()
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Continuous Domain Cellular Automaton")
 	if err := ebiten.RunGame(NewGame(screenWidth, screenHeight)); err != nil {
