@@ -33,14 +33,26 @@ LinearisedThreshold(x=0.75, x0=0.5, alpha=0.1) => 1.0
 LinearisedThreshold(x=1, x0=0.5, alpha=0.1) => 1.0
 LinearisedThreshold(x=2, x0=0.5, alpha=0.1) => 1.0
 
-# logistic_interval
+# LogisticInterval
 Example inputs: x=0.5, a=0.3, b=0.7, alpha=0.1
+Py output:
+LogisticInterval(x=0.3, a=0.3, b=0.7, alpha=0.1) => 0.49999994373241896
+LogisticInterval(x=0.4, a=0.3, b=0.7, alpha=0.1) => 0.9820077563737207
+LogisticInterval(x=0.5, a=0.3, b=0.7, alpha=0.1) => 0.9993294121987771
+LogisticInterval(x=0.6, a=0.3, b=0.7, alpha=0.1) => 0.9820077563737207
+LogisticInterval(x=0.7, a=0.3, b=0.7, alpha=0.1) => 0.49999994373241896
 
-# linearized_interval
+# LinearisedInterval
 Example inputs: x=0.5, a=0.3, b=0.7, alpha=0.1
+LinearisedInterval(x=0.3, a=0.3, b=0.7, alpha=0.1) => 0.5
+LinearisedInterval(x=0.4, a=0.3, b=0.7, alpha=0.1) => 1.0
+LinearisedInterval(x=0.5, a=0.3, b=0.7, alpha=0.1) => 1.0
+LinearisedInterval(x=0.6, a=0.3, b=0.7, alpha=0.1) => 1.0
+LinearisedInterval(x=0.7, a=0.3, b=0.7, alpha=0.1) => 0.5
 
-# lerp
+# Lerp
 Example inputs: a=0, b=1, t=0.5
+Lerp(a=0,b=1,t=0.5) => 0.5
 
 # BasicRules.s
 Example inputs: n=0.5, m=0.5, field=np.array([[0.1, 0.2], [0.3, 0.4]])

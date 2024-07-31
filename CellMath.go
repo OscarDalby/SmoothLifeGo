@@ -106,24 +106,24 @@ func (cm CellMath) Fft2(input *mat.CDense, rows, cols int) *mat.Dense {
 	return amp
 }
 
-// LogisticThreshold computes the sigmoid curve of a provided slice, with alpha adjusting
-// the steepness and direction of the transition.
-// Used to smoothly transition from near 0 -> 1 as x moves from left to right past x0, with alpha
-// a parameter to determine how abruptly this change occurs
-func (cm CellMath) LogisticThresholdElementWise(x []float64, x0 float64, alpha float64) []float64 {
-	result := make([]float64, len(x))
-	for i, val := range x {
-		result[i] = 1.0 / (1.0 + math.Exp(-4.0/alpha*(val-x0)))
-	}
-	return result
-}
-
 // LogisticThreshold computes the sigmoid curve of a provided x, with alpha adjusting
 // the steepness and direction of the transition.
 // Used to smoothly transition from near 0 -> 1 as x moves from left to right past x0, with alpha
 // a parameter to determine how abruptly this change occurs
 func (CellMath CellMath) LogisticThreshold(x float64, x0 float64, alpha float64) float64 {
 	return 1.0 / (1.0 + math.Exp(-4.0/alpha*(x-x0)))
+}
+
+// LogisticThreshold computes the sigmoid curve of a provided slice, with alpha adjusting
+// the steepness and direction of the transition.
+// Used to smoothly transition from near 0 -> 1 as x moves from left to right past x0, with alpha
+// a parameter to determine how abruptly this change occurs
+func (cm CellMath) LogisticThresholdElementWise(x []float64, x0 float64, alpha float64) []float64 {
+	result := make([]float64, len(x))
+	for i, x := range x {
+		result[i] = cm.LogisticThreshold(x, x0, alpha)
+	}
+	return result
 }
 
 // Logistic function on x between a and b with transition width alpha
@@ -135,15 +135,9 @@ func (cm CellMath) LogisticInterval(x float64, a float64, b float64, alpha float
 	return cm.LogisticThreshold(x, a, alpha) * (1.0 - cm.LogisticThreshold(x, b, alpha))
 }
 
-func (cm CellMath) HardThreshold(x1 []int, x2 []int) []bool {
-	if len(x1) != len(x2) {
-		panic("slices are not of the same length and broadcasting is not implemented")
-	}
-	result := make([]bool, len(x1))
-	for i := range x1 {
-		result[i] = x1[i] > x2[i]
-	}
-	return result
+// Returns if arg1 is greater than arg2
+func (cm CellMath) HardThreshold(arg1 float64, arg2 float64) bool {
+	return arg1 > arg2
 }
 
 func (cm CellMath) Clamp(a float64, aMin float64, aMax float64) float64 {
@@ -158,8 +152,8 @@ func (cm CellMath) Clamp(a float64, aMin float64, aMax float64) float64 {
 
 func (cm CellMath) LinearisedThresholdElementWise(x []float64, x0 float64, alpha float64) []float64 {
 	result := make([]float64, len(x))
-	for i, val := range x {
-		result[i] = cm.Clamp((val-x0)/alpha+0.5, 0, 1)
+	for i, x := range x {
+		result[i] = cm.LinearisedThreshold(x, x0, alpha)
 	}
 	return result
 }
