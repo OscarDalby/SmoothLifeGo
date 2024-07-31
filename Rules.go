@@ -28,3 +28,5 @@ func (br BasicRules) S(cm CellMath, n float64, m float64) float64 {
 	var newAliveness = cm.LogisticInterval(n, threshold1, threshold2, br.N)
 	return cm.Clamp(newAliveness, 0, 1)
 }
+
+var basicRules BasicRules = BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"log"
@@ -46,7 +47,10 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func main() {
-	secondary()
+	fmt.Printf("basicRules: %v", basicRules)
+	var cm = CellMath{}
+	var inner = cm.AntialiasedCircle(512, 512, 7, true, 0)
+	fmt.Printf("inner: %v", inner)
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Continuous Domain Cellular Automaton")
 	if err := ebiten.RunGame(NewGame(screenWidth, screenHeight)); err != nil {

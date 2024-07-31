@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"math/cmplx"
 	"math/rand"
@@ -180,19 +179,56 @@ func (cm CellMath) Lerp(a, b, t float64) float64 {
 	return (1.0-t)*a + t*b
 }
 
-func secondary() {
-	CellMath := CellMath{}
-	dataToExp := []float64{1, 2, 3}
-	exp_result := CellMath.Exp(dataToExp)
-	fmt.Println(exp_result)
+func (cm CellMath) MeshGrid(sizeY, sizeX int) (*mat.Dense, *mat.Dense) {
+	yy := mat.NewDense(sizeY, sizeX, nil)
+	xx := mat.NewDense(sizeY, sizeX, nil)
 
-	a := []int{1, 3, 5}
-	b := []int{2, 3, 2}
-	greater_result := CellMath.Greater(a, b)
-	fmt.Println(greater_result)
+	for i := 0; i < sizeY; i++ {
+		for j := 0; j < sizeX; j++ {
+			yy.Set(i, j, float64(i))
+			xx.Set(i, j, float64(j))
+		}
+	}
 
-	dataToClip := []int{1, 2, 3, 4, 5, 6}
-	clipResult := CellMath.Clip(dataToClip, 2, 4)
-	fmt.Println(clipResult)
+	return yy, xx
+}
 
+func (cm CellMath) AntialiasedCircle(sizeX int, sizeY int, radius float64, roll bool, logres float64) *mat.Dense {
+	yy, xx := cm.MeshGrid(sizeY, sizeX)
+	logistic := mat.NewDense(sizeY, sizeX, nil)
+
+	if logres == 0 {
+		logres = math.Log2(math.Min(float64(sizeX), float64(sizeY)))
+	}
+
+	for i := 0; i < sizeY; i++ {
+		for j := 0; j < sizeX; j++ {
+			x := float64(xx.At(i, j)) - float64(sizeX)/2
+			y := float64(yy.At(i, j)) - float64(sizeY)/2
+			r := math.Sqrt(x*x + y*y)
+			expValue := logres * (r - radius)
+			logistic.Set(i, j, 1/(1+math.Exp(expValue)))
+		}
+	}
+
+	if roll {
+		logistic = cm.RollMatrix(logistic, sizeY/2, sizeX/2)
+	}
+
+	return logistic
+}
+
+func (cm CellMath) RollMatrix(input *mat.Dense, shiftY, shiftX int) *mat.Dense {
+	r, c := input.Dims()
+	output := mat.NewDense(r, c, nil)
+
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			newI := (i + shiftY) % r
+			newJ := (j + shiftX) % c
+			output.Set(newI, newJ, input.At(i, j))
+		}
+	}
+
+	return output
 }
