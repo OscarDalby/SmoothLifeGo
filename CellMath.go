@@ -11,10 +11,10 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-type SliceOperator struct {
+type CellMath struct {
 }
 
-func (SliceOperator SliceOperator) Exp(values []float64) []float64 {
+func (cm CellMath) Exp(values []float64) []float64 {
 	result := make([]float64, len(values))
 	for i, v := range values {
 		result[i] = math.Exp(v)
@@ -22,7 +22,7 @@ func (SliceOperator SliceOperator) Exp(values []float64) []float64 {
 	return result
 }
 
-func (SliceOperator SliceOperator) Greater(a, b []int) []bool {
+func (cm CellMath) Greater(a, b []int) []bool {
 	length := len(a)
 	if len(b) < length {
 		length = len(b)
@@ -34,7 +34,7 @@ func (SliceOperator SliceOperator) Greater(a, b []int) []bool {
 	return result
 }
 
-func (SliceOperator SliceOperator) Clip(values []int, min, max int) []int {
+func (cm CellMath) Clip(values []int, min, max int) []int {
 	clipped := make([]int, len(values))
 	for i, v := range values {
 		if v < min {
@@ -48,7 +48,7 @@ func (SliceOperator SliceOperator) Clip(values []int, min, max int) []int {
 	return clipped
 }
 
-func (SliceOperator SliceOperator) Sqrt(slice []float64) []float64 {
+func (cm CellMath) Sqrt(slice []float64) []float64 {
 	result := make([]float64, len(slice))
 	for i, val := range slice {
 		result[i] = math.Sqrt(val)
@@ -56,7 +56,7 @@ func (SliceOperator SliceOperator) Sqrt(slice []float64) []float64 {
 	return result
 }
 
-func (SliceOperator SliceOperator) Roll(slice []int, shift int) []int {
+func (cm CellMath) Roll(slice []int, shift int) []int {
 	n := len(slice)
 	if n == 0 {
 		return slice
@@ -65,7 +65,7 @@ func (SliceOperator SliceOperator) Roll(slice []int, shift int) []int {
 	return append(slice[n-shift:], slice[:n-shift]...)
 }
 
-func (SliceOperator SliceOperator) Sum(slice []int) int {
+func (cm CellMath) Sum(slice []int) int {
 	total := 0
 	for _, value := range slice {
 		total += value
@@ -73,11 +73,11 @@ func (SliceOperator SliceOperator) Sum(slice []int) int {
 	return total
 }
 
-func (SliceOperator SliceOperator) Zeros(length int) []float64 {
+func (cm CellMath) Zeros(length int) []float64 {
 	return make([]float64, length)
 }
 
-func (SliceOperator SliceOperator) Real(complexSlice []complex128) []float64 {
+func (cm CellMath) Real(complexSlice []complex128) []float64 {
 	realParts := make([]float64, len(complexSlice))
 	for i, c := range complexSlice {
 		realParts[i] = real(c)
@@ -85,13 +85,13 @@ func (SliceOperator SliceOperator) Real(complexSlice []complex128) []float64 {
 	return realParts
 }
 
-func (SliceOperator SliceOperator) RandomRandint(low, high int) int {
+func (cm CellMath) RandomRandint(low, high int) int {
 	src := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(src)
 	return rnd.Intn(high-low) + low
 }
 
-func (SliceOperator SliceOperator) Fft2(input *mat.CDense, rows, cols int) *mat.Dense {
+func (cm CellMath) Fft2(input *mat.CDense, rows, cols int) *mat.Dense {
 	ft := sfft.NewFFT2(rows, cols)
 	ftData := ft.FFT(input.RawCMatrix().Data)
 	ftMat := mat.NewCDense(rows, cols, ftData)
@@ -110,7 +110,7 @@ func (SliceOperator SliceOperator) Fft2(input *mat.CDense, rows, cols int) *mat.
 // the steepness and direction of the transition.
 // Used to smoothly transition from near 0 -> 1 as x moves from left to right past x0, with alpha
 // a parameter to determine how abruptly this change occurs
-func (SliceOperator SliceOperator) LogisticThresholdElementWise(x []float64, x0 float64, alpha float64) []float64 {
+func (cm CellMath) LogisticThresholdElementWise(x []float64, x0 float64, alpha float64) []float64 {
 	result := make([]float64, len(x))
 	for i, val := range x {
 		result[i] = 1.0 / (1.0 + math.Exp(-4.0/alpha*(val-x0)))
@@ -122,7 +122,7 @@ func (SliceOperator SliceOperator) LogisticThresholdElementWise(x []float64, x0 
 // the steepness and direction of the transition.
 // Used to smoothly transition from near 0 -> 1 as x moves from left to right past x0, with alpha
 // a parameter to determine how abruptly this change occurs
-func (SliceOperator SliceOperator) LogisticThreshold(x float64, x0 float64, alpha float64) float64 {
+func (CellMath CellMath) LogisticThreshold(x float64, x0 float64, alpha float64) float64 {
 	return 1.0 / (1.0 + math.Exp(-4.0/alpha*(x-x0)))
 }
 
@@ -131,11 +131,11 @@ func (SliceOperator SliceOperator) LogisticThreshold(x float64, x0 float64, alph
 // x < a		: 0
 // a < x < b 	: 1
 // a > b		: 0
-func (SliceOperator SliceOperator) LogisticInterval(x float64, a float64, b float64, alpha float64) float64 {
-	return SliceOperator.LogisticThreshold(x, a, alpha) * (1.0 - SliceOperator.LogisticThreshold(x, b, alpha))
+func (cm CellMath) LogisticInterval(x float64, a float64, b float64, alpha float64) float64 {
+	return cm.LogisticThreshold(x, a, alpha) * (1.0 - cm.LogisticThreshold(x, b, alpha))
 }
 
-func (SliceOperator SliceOperator) HardThreshold(x1 []int, x2 []int) []bool {
+func (cm CellMath) HardThreshold(x1 []int, x2 []int) []bool {
 	if len(x1) != len(x2) {
 		panic("slices are not of the same length and broadcasting is not implemented")
 	}
@@ -146,7 +146,7 @@ func (SliceOperator SliceOperator) HardThreshold(x1 []int, x2 []int) []bool {
 	return result
 }
 
-func (SliceOperator SliceOperator) Clamp(a float64, aMin float64, aMax float64) float64 {
+func (cm CellMath) Clamp(a float64, aMin float64, aMax float64) float64 {
 	var output float64 = a
 	if a < aMin {
 		output = aMin
@@ -156,17 +156,17 @@ func (SliceOperator SliceOperator) Clamp(a float64, aMin float64, aMax float64) 
 	return output
 }
 
-func (SliceOperator SliceOperator) LinearisedThresholdElementWise(x []float64, x0 float64, alpha float64) []float64 {
+func (cm CellMath) LinearisedThresholdElementWise(x []float64, x0 float64, alpha float64) []float64 {
 	result := make([]float64, len(x))
 	for i, val := range x {
-		result[i] = SliceOperator.Clamp((val-x0)/alpha+0.5, 0, 1)
+		result[i] = cm.Clamp((val-x0)/alpha+0.5, 0, 1)
 	}
 	return result
 }
 
 // Threshold x around x0 with a linear transition region alpha
-func (SliceOperator SliceOperator) LinearisedThreshold(x float64, x0 float64, alpha float64) float64 {
-	return SliceOperator.Clamp((x-x0)/alpha+0.5, 0, 1)
+func (cm CellMath) LinearisedThreshold(x float64, x0 float64, alpha float64) float64 {
+	return cm.Clamp((x-x0)/alpha+0.5, 0, 1)
 }
 
 // a<x<b with linearised threshold regions
@@ -174,12 +174,12 @@ func (SliceOperator SliceOperator) LinearisedThreshold(x float64, x0 float64, al
 // x < a		: 0
 // a < x < b 	: 1
 // a > b		: 0
-func (SliceOperator SliceOperator) LinearisedInterval(x float64, a float64, b float64, alpha float64) float64 {
-	return SliceOperator.LinearisedThreshold(x, a, alpha) * (1.0 - SliceOperator.LinearisedThreshold(x, b, alpha))
+func (cm CellMath) LinearisedInterval(x float64, a float64, b float64, alpha float64) float64 {
+	return cm.LinearisedThreshold(x, a, alpha) * (1.0 - cm.LinearisedThreshold(x, b, alpha))
 }
 
 // Linear interpolate from a -> b with t in [0,1]
-func Lerp(a, b, t float64) float64 {
+func (cm CellMath) Lerp(a, b, t float64) float64 {
 	if t < 0 || t > 1 {
 		panic("t should be in [0,1]")
 	}
@@ -187,18 +187,18 @@ func Lerp(a, b, t float64) float64 {
 }
 
 func secondary() {
-	SliceOperator := SliceOperator{}
+	CellMath := CellMath{}
 	dataToExp := []float64{1, 2, 3}
-	exp_result := SliceOperator.Exp(dataToExp)
+	exp_result := CellMath.Exp(dataToExp)
 	fmt.Println(exp_result)
 
 	a := []int{1, 3, 5}
 	b := []int{2, 3, 2}
-	greater_result := SliceOperator.Greater(a, b)
+	greater_result := CellMath.Greater(a, b)
 	fmt.Println(greater_result)
 
 	dataToClip := []int{1, 2, 3, 4, 5, 6}
-	clipResult := SliceOperator.Clip(dataToClip, 2, 4)
+	clipResult := CellMath.Clip(dataToClip, 2, 4)
 	fmt.Println(clipResult)
 
 }
