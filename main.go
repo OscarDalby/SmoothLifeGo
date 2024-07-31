@@ -1,35 +1,41 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"log"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"gonum.org/v1/gonum/mat"
 )
 
 const screenWidth = 600
 const screenHeight = 600
 
 type Game struct {
-	img *image.RGBA
+	img    *image.RGBA
+	matrix *mat.Dense
 }
 
-func NewGame(screenWidth int, screenHeight int) *Game {
+func NewGame(screenWidth int, screenHeight int, matrix *mat.Dense) *Game {
 	return &Game{
-		img: image.NewRGBA(image.Rect(0, 0, screenWidth, screenHeight)),
+		img:    image.NewRGBA(image.Rect(0, 0, screenWidth, screenHeight)),
+		matrix: matrix,
 	}
 }
 
 func (g *Game) Update() error {
-	for x := 0; x < screenWidth; x++ {
-		for y := 0; y < screenHeight; y++ {
-			// this is just a static gradient at the mo
+	rows, cols := g.matrix.Dims()
+
+	for x := 0; x < cols; x++ {
+		for y := 0; y < rows; y++ {
+			val := g.matrix.At(y, x)
+			intensity := uint8(math.Round(val * 255))
 			c := color.RGBA{
-				R: uint8((x + y) % 256),
-				G: uint8((x * y) % 256),
-				B: 128,
+				R: intensity,
+				G: intensity,
+				B: intensity,
 				A: 255,
 			}
 			g.img.SetRGBA(x, y, c)
@@ -47,13 +53,14 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func main() {
-	fmt.Printf("basicRules: %v", basicRules)
-	var cm = CellMath{}
-	var inner = cm.AntialiasedCircle(512, 512, 7, true, 0)
-	fmt.Printf("inner: %v", inner)
+	cm := CellMath{}
+	radius := 7.0
+	logres := 0.0
+	matrix := cm.AntialiasedCircle(screenWidth, screenHeight, radius, true, logres)
+	game := NewGame(screenWidth, screenHeight, matrix)
 	ebiten.SetWindowSize(screenWidth, screenHeight)
-	ebiten.SetWindowTitle("Continuous Domain Cellular Automaton")
-	if err := ebiten.RunGame(NewGame(screenWidth, screenHeight)); err != nil {
+	ebiten.SetWindowTitle("AntialiasedCircle Viz")
+	if err := ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
 }
