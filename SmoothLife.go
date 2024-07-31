@@ -1,44 +1,34 @@
 package main
 
+func ConstructSmoothLife(width int, height int) *SmoothLife {
+	return &SmoothLife{
+		width:  width,
+		height: height,
+		cm:     CellMath{},
+	}
+}
+
 type SmoothLife struct {
 	width  int
 	height int
+	cm     CellMath
+}
+
+func (sl SmoothLife) Clear() {
+
+}
+
+func (sl SmoothLife) Step() {
+
 }
 
 // class SmoothLife:
 //     def __init__(self, height, width):
 //         self.width = width
 //         self.height = height
-
 //         self.multipliers = Multipliers((height, width))
-
 //         self.rules = BasicRules()
-//         # self.rules = SmoothTimestepRules()
-//         # self.rules = ExtensiveRules(  # BasicRules
-//         #     B1=0.278,
-//         #     B2=0.365,
-//         #     D1=0.267,
-//         #     D2=0.445,
-//         #     sigmode=4,
-//         #     sigtype=4,
-//         #     mixtype=4,
-//         #     timestep_mode=0,
-//         #     dt=0,
-//         # )
-//         # self.rules = ExtensiveRules(  # SmoothTimestepRules
-//         #     B1=0.254,
-//         #     B2=0.312,
-//         #     D1=0.340,
-//         #     D2=0.518,
-//         #     sigmode=2,
-//         #     sigtype=1,
-//         #     mixtype=0,
-//         #     timestep_mode=2,
-//         #     dt=0.2,
-//         # )
-
 //         self.clear()
-
 //     def clear(self):
 //         """Zero out the field"""
 //         self.field = np.zeros((self.height, self.width))
@@ -96,36 +86,3 @@ type SmoothLife struct {
 
 //     ani = animation.FuncAnimation(fig, animate, interval=60, blit=True)
 //     plt.show()
-
-// def save_animation():
-//     w = 1 << 8
-//     h = 1 << 8
-//     # w = 1920
-//     # h = 1080
-//     sl = SmoothLife(h, w)
-//     sl.add_speckles()
-
-//     # Matplotlib shoves a horrible border on animation saves.
-//     # We'll do it manually. Ugh
-
-//     from skvideo.io import FFmpegWriter
-//     from matplotlib import cm
-
-//     fps = 10
-//     frames = 100
-//     w = FFmpegWriter("smoothlife.mp4", inputdict={"-r": str(fps)})
-//     for i in range(frames):
-//         frame = cm.viridis(sl.field)
-//         frame *= 255
-//         frame = frame.astype("uint8")
-//         w.writeFrame(frame)
-//         sl.step()
-//     w.close()
-
-//     # Also, webm output isn't working for me,
-//     # so I have to manually convert. Ugh
-//     # ffmpeg -i smoothlife.mp4 -c:v libvpx -b:v 2M smoothlife.webm
-
-// if __name__ == "__main__":
-//     show_animation()
-//     # save_animation()
