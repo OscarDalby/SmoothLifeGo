@@ -210,6 +210,7 @@ func (cm CellMath) HardThreshold(arg1 float64, arg2 float64) bool {
 	return arg1 > arg2
 }
 
+// Clamp keeps a float64 within a range
 func (cm CellMath) Clamp(a float64, aMin float64, aMax float64) float64 {
 	var output float64 = a
 	if a < aMin {
@@ -218,6 +219,22 @@ func (cm CellMath) Clamp(a float64, aMin float64, aMax float64) float64 {
 		output = aMax
 	}
 	return output
+}
+
+// ClampDense applies the clamp operation to each element of the matrix a
+func (cm CellMath) ClampDense(a *mat.Dense, aMin float64, aMax float64) *mat.Dense {
+	rows, cols := a.Dims()
+	result := mat.NewDense(rows, cols, nil)
+
+	// Apply the clamp operation element-wise
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			val := a.At(i, j)
+			clampedValue := cm.Clamp(val, aMin, aMax)
+			result.Set(i, j, clampedValue)
+		}
+	}
+	return result
 }
 
 func (cm CellMath) LinearisedThresholdElementWise(x []float64, x0 float64, alpha float64) []float64 {
@@ -389,6 +406,7 @@ func cdenseToSlice(A *mat.CDense) [][]complex128 {
 	return result
 }
 
+// ifft2 gets the inverse fast fourier transform of a CDense
 func (cm CellMath) ifft2(input *mat.CDense) *mat.CDense {
 	inputComplexArr := cdenseToSlice(input)
 	outputComplexArr := fft.IFFT2(inputComplexArr)
@@ -396,6 +414,7 @@ func (cm CellMath) ifft2(input *mat.CDense) *mat.CDense {
 	return output
 }
 
+// RealPartCDenseMatrix gets the real part of a CDense and returns a Dense
 func (cm CellMath) RealPartCDenseMatrix(cd *mat.CDense) *mat.Dense {
 	r, c := cd.Dims()
 	realParts := mat.NewDense(r, c, nil)
@@ -407,4 +426,66 @@ func (cm CellMath) RealPartCDenseMatrix(cd *mat.CDense) *mat.Dense {
 	}
 
 	return realParts
+}
+
+// LogisticThresholdDenseElementWise applies the LogisticThreshold to each element of x with corresponding x0 from matrix x0.
+func (cm CellMath) LogisticThresholdDenseDoubleElementWise(x, x0 *mat.Dense, alpha float64) *mat.Dense {
+	rows, cols := x.Dims()
+	result := mat.NewDense(rows, cols, nil)
+
+	if x0x, x0y := x0.Dims(); x0x != rows || x0y != cols {
+		log.Panic("Dimensions of x and x0 must be the same")
+	}
+
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			xi := x.At(i, j)
+			x0i := x0.At(i, j)
+			result.Set(i, j, cm.LogisticThreshold(xi, x0i, alpha))
+		}
+	}
+	return result
+}
+
+// LogisticIntervalDense computes the logistic interval using matrices n, a, and b, with a uniform alpha.
+func (cm CellMath) LogisticIntervalTripleDense(n, a, b *mat.Dense, alpha float64) *mat.Dense {
+	nRows, nCols := n.Dims()
+	aRows, aCols := a.Dims()
+	bRows, bCols := b.Dims()
+	if nRows != aRows || nCols != aCols {
+		log.Panic("Dimensions of n and a must match")
+	}
+	if nRows != bRows || nCols != bCols {
+		log.Panic("Dimensions of n and b must match")
+	}
+	thresholdA := cm.LogisticThresholdDenseDoubleElementWise(n, a, alpha)
+	thresholdB := cm.LogisticThresholdDenseDoubleElementWise(n, b, alpha)
+	rows, cols := thresholdB.Dims()
+	invThresholdB := mat.NewDense(rows, cols, nil)
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			invThresholdB.Set(i, j, 1.0-thresholdB.At(i, j))
+		}
+	}
+	result := mat.NewDense(rows, cols, nil)
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			result.Set(i, j, thresholdA.At(i, j)*invThresholdB.At(i, j))
+		}
+	}
+
+	return result
+}
+
+// ConvertDenseToCDense takes a *mat.Dense matrix and converts it to a *mat.CDense matrix.
+func (cm CellMath) ConvertDenseToCDense(input *mat.Dense) *mat.CDense {
+	rows, cols := input.Dims()
+	output := mat.NewCDense(rows, cols, nil)
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			realPart := input.At(i, j)
+			output.Set(i, j, complex(realPart, 0))
+		}
+	}
+	return output
 }

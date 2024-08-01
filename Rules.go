@@ -15,7 +15,7 @@ func (BasicRules BasicRules) Clear() {
 }
 
 // State transition function
-func (br BasicRules) S(cm CellMath, n *mat.Dense, m *mat.Dense) float64 {
+func (br BasicRules) S(cm CellMath, n *mat.Dense, m *mat.Dense) *mat.Dense {
 	// Convert the local cell average `m` to a metric of how alive the local cell is.
 	// We transition around 0.5 (0 is fully dead and 1 is fully alive).
 	// The transition width is set by `br.M`
@@ -27,6 +27,6 @@ func (br BasicRules) S(cm CellMath, n *mat.Dense, m *mat.Dense) float64 {
 	threshold2 := cm.LerpDense(br.B2, br.D2, aliveness)
 	// Now with the smoothness of `logisticInterval` determine if the neighbor density is
 	// inside of the threshold to stay/become alive.
-	newAliveness := cm.LogisticIntervalDenseElementWise(n, threshold1, threshold2, br.N)
-	return cm.Clamp(newAliveness, 0, 1)
+	newAliveness := cm.LogisticIntervalTripleDense(n, threshold1, threshold2, br.N)
+	return cm.ClampDense(newAliveness, 0, 1)
 }

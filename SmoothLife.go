@@ -23,9 +23,10 @@ type SmoothLife struct {
 
 func (sl SmoothLife) Clear() {
 	sl.field = mat.NewCDense(sl.height, sl.width, nil)
+	sl.field.Zero()
 }
 
-func (sl SmoothLife) Step() {
+func (sl SmoothLife) Step() *mat.CDense {
 	var newField *mat.CDense = sl.cm.Fft2(sl.field)
 
 	var mBuffer = sl.cm.ElementwiseMultiplyCDenseMatrices(newField, sl.mp.M)
@@ -37,7 +38,8 @@ func (sl SmoothLife) Step() {
 	var realMBuffer = sl.cm.RealPartCDenseMatrix(_mBuffer)
 	var realNBuffer = sl.cm.RealPartCDenseMatrix(_nBuffer)
 
-	sl.field = sl.rules.S(sl.cm, realNBuffer, realMBuffer)
+	sl.field = sl.cm.ConvertDenseToCDense(sl.rules.S(sl.cm, realNBuffer, realMBuffer))
+	return sl.field
 }
 
 //         self.field = self.rules.s(N_buffer, M_buffer, self.field)

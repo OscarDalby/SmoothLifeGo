@@ -32,7 +32,7 @@ func ConstructMultipliers(
 	inner = cm.DivideDenseMatrix(inner, inner_magnitude)
 	annulus = cm.DivideDenseMatrix(annulus, annulus_magnitude)
 
-	// # Precompute the FFT's
+	// Precompute the FFT's
 	M := cm.Fft2RealIn(inner)
 	N := cm.Fft2RealIn(annulus)
 
