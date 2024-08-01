@@ -4,6 +4,8 @@ go 1.22.5
 
 require github.com/hajimehoshi/ebiten/v2 v2.7.8
 
+require github.com/mjibson/go-dsp v0.0.0-20180508042940-11479a337f12 // indirect
+
 require (
 	github.com/davidkleiven/gosfft v1.0.6
 	github.com/ebitengine/gomobile v0.0.0-20240518074828-e86332849895 // indirect
