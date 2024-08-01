@@ -10,15 +10,18 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-const screenWidth = 600
-const screenHeight = 600
+const logres float64 = 0.5
+const radius float64 = 7.0
+const width int = 1 << 8
+const height int = 1 << 8
+const screenWidth = width
+const screenHeight = height
 
 var cm CellMath = CellMath{}
-var logres float64 = 0.5
-var radius float64 = 7.0
-var width int = 512
-var height int = 512
 var mp *Multipliers = ConstructMultipliers(cm, radius, width, height, logres)
+
+// var br BasicRules = BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
+// Birth range, survival range, sigmoid widths
 var br BasicRules = BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
 var sl *SmoothLife = ConstructSmoothLife(cm, mp, br, width, height)
 
@@ -40,7 +43,16 @@ func init() {
 	game = NewGame(screenWidth, screenHeight, matrix)
 }
 
+var updateTimerStart = 10
+var updateTimer = updateTimerStart
+
 func (g *Game) Update() error {
+	if updateTimer > 0 {
+		updateTimer--
+		return nil
+	} else {
+		updateTimer = updateTimerStart
+	}
 	sl.AddSpeckles()
 	var newStep *mat.CDense = sl.Step()
 	rows, cols := newStep.Dims()
@@ -53,10 +65,10 @@ func (g *Game) Update() error {
 			// log.Printf("i: %v", i)
 			intensity := uint8(math.Round(r*255 + i*255))
 			c := color.RGBA{
-				R: intensity,
-				G: intensity,
-				B: intensity,
-				A: 255,
+				R: intensity + uint8(x*4*int(intensity)) + uint8(y*4*int(intensity)),
+				G: intensity + uint8(x*int(intensity)) + uint8(y*int(intensity)),
+				B: intensity + uint8(x*int(intensity)) + uint8(y*int(intensity)),
+				A: intensity,
 			}
 			g.img.SetRGBA(x, y, c)
 		}
