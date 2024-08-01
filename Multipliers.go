@@ -5,12 +5,13 @@ import (
 )
 
 type Multipliers struct {
-	cm      CellMath
-	inner   *mat.Dense
-	outer   *mat.Dense
-	annulus *mat.Dense
-	M       *mat.CDense
-	N       *mat.CDense
+	cm          CellMath
+	inner       *mat.Dense
+	outer       *mat.Dense
+	outerRadius float64
+	annulus     *mat.Dense
+	M           *mat.CDense
+	N           *mat.CDense
 }
 
 func ConstructMultipliers(
@@ -38,11 +39,12 @@ func ConstructMultipliers(
 	N := cm.Fft2RealIn(annulus)
 
 	return &Multipliers{
-		cm:      CellMath{},
-		inner:   inner,
-		outer:   outer,
-		annulus: annulus,
-		M:       M,
-		N:       N,
+		cm:          CellMath{},
+		inner:       inner,
+		outer:       outer,
+		outerRadius: outerRadius,
+		annulus:     annulus,
+		M:           M,
+		N:           N,
 	}
 }

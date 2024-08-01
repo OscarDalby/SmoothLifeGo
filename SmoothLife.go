@@ -1,6 +1,10 @@
 package main
 
 import (
+	"math"
+	"math/rand"
+	"time"
+
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -48,6 +52,22 @@ func (sl SmoothLife) Step() *mat.CDense {
 
 	sl.field = sl.cm.ConvertDenseToCDense(sl.rules.S(sl.cm, realNBuffer, realMBuffer))
 	return sl.field
+}
+
+func (sl SmoothLife) AddSpeckles() {
+	rand.New(rand.NewSource(time.Now().Unix()))
+	var count int = int(float64(sl.width*sl.height) / math.Pow(float64(mp.outerRadius*2), 2))
+	var intensity complex128 = 1.0 + 1i
+	for i := 0; i < count; i++ {
+		var radius int = int(mp.outerRadius)
+		row := rand.Intn(sl.height - radius)
+		col := rand.Intn(sl.width - radius)
+		for dr := 0; dr < radius; dr++ {
+			for dc := 0; dc < radius; dc++ {
+				sl.field.Set(row+dr, col+dc, intensity)
+			}
+		}
+	}
 }
 
 //     def add_speckles(self, count=None, intensity=1):

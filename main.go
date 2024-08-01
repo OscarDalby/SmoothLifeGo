@@ -41,16 +41,16 @@ func init() {
 }
 
 func (g *Game) Update() error {
+	sl.AddSpeckles()
 	var newStep *mat.CDense = sl.Step()
-	// matrix = cm.RealPartCDenseMatrix(newStep)
 	rows, cols := newStep.Dims()
 
 	for x := 0; x < cols; x++ {
 		for y := 0; y < rows; y++ {
 			val := newStep.At(y, x)
 			r, i := real(val), imag(val)
-			log.Printf("r: %v", r)
-			log.Printf("i: %v", i)
+			// log.Printf("r: %v", r)
+			// log.Printf("i: %v", i)
 			intensity := uint8(math.Round(r*255 + i*255))
 			c := color.RGBA{
 				R: intensity,
