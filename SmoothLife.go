@@ -27,6 +27,15 @@ func (sl SmoothLife) Clear() {
 
 func (sl SmoothLife) Step() {
 	var newField *mat.CDense = sl.cm.Fft2(sl.field)
+
+	var mBuffer = sl.cm.ElementwiseMultiplyCDenseMatrices(newField, sl.mp.M)
+	var nBuffer = sl.cm.ElementwiseMultiplyCDenseMatrices(newField, sl.mp.N)
+
+	// var _mBuffer = sl.cm.InverseFft2(mBuffer)
+	// var _nBuffer = sl.cm.InverseFft2(mBuffer)
+
+	// var realMBuffer = sl.cm.RealPartCDenseMatrix(_mBuffer)
+	// var realNBuffer = sl.cm.RealPartCDenseMatrix(_nBuffer)
 }
 
 //     def step(self):

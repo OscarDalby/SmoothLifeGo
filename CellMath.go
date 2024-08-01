@@ -287,3 +287,24 @@ func (cm CellMath) DivideDenseMatrix(A *mat.Dense, divisor float64) *mat.Dense {
 	}
 	return result
 }
+
+// ElementwiseMultiplyCDenseMatrices multiplies two complex matrices element-wise.
+func (cm CellMath) ElementwiseMultiplyCDenseMatrices(A, B *mat.CDense) *mat.CDense {
+	r, c := A.Dims()
+
+	rB, cB := B.Dims()
+	if r != rB || c != cB {
+		panic("matrices are of different dimensions")
+	}
+
+	result := mat.NewCDense(r, c, nil)
+
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			valA := A.At(i, j)
+			valB := B.At(i, j)
+			result.Set(i, j, complex(real(valA)*real(valB)-imag(valA)*imag(valB), real(valA)*imag(valB)+imag(valA)*real(valB)))
+		}
+	}
+	return result
+}
