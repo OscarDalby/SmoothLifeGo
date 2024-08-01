@@ -1,12 +1,14 @@
 package main
 
 import (
+	"log"
 	"math"
 	"math/cmplx"
 	"math/rand"
 	"time"
 
 	"github.com/davidkleiven/gosfft/sfft"
+	"github.com/mjibson/go-dsp/fft"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -164,6 +166,45 @@ func (cm CellMath) LogisticInterval(x float64, a float64, b float64, alpha float
 	return cm.LogisticThreshold(x, a, alpha) * (1.0 - cm.LogisticThreshold(x, b, alpha))
 }
 
+// LogisticIntervalElementWise computes the LogisticInterval function on a slice of x values between a and b with transition width alpha
+// Element-wise version of LogisticInterval that handles slices of float64.
+// This function is useful for performing vectorized-like operations in scenarios where input x is a sequence of values.
+func (cm CellMath) LogisticIntervalElementWise(x []float64, a float64, b float64, alpha float64) []float64 {
+	result := make([]float64, len(x))
+	for i, xi := range x {
+		result[i] = cm.LogisticInterval(xi, a, b, alpha)
+	}
+	return result
+}
+
+// LogisticThresholdElementWise applies LogisticThreshold to each element of x in a mat.Dense matrix.
+func (cm CellMath) LogisticThresholdDenseElementWise(x *mat.Dense, x0 float64, alpha float64) *mat.Dense {
+	rows, cols := x.Dims()
+	result := mat.NewDense(rows, cols, nil)
+
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			xi := x.At(i, j)
+			result.Set(i, j, cm.LogisticThreshold(xi, x0, alpha))
+		}
+	}
+	return result
+}
+
+// LogisticIntervalElementWise applies LogisticInterval to each element of x in a mat.Dense matrix.
+func (cm CellMath) LogisticIntervalDenseElementWise(x *mat.Dense, a float64, b float64, alpha float64) *mat.Dense {
+	rows, cols := x.Dims()
+	result := mat.NewDense(rows, cols, nil)
+
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			xi := x.At(i, j)
+			result.Set(i, j, cm.LogisticInterval(xi, a, b, alpha))
+		}
+	}
+	return result
+}
+
 // Returns if arg1 is greater than arg2
 func (cm CellMath) HardThreshold(arg1 float64, arg2 float64) bool {
 	return arg1 > arg2
@@ -207,6 +248,22 @@ func (cm CellMath) Lerp(a, b, t float64) float64 {
 		panic("t should be in [0,1]")
 	}
 	return (1.0-t)*a + t*b
+}
+
+// Lerp performs linear interpolation between a and b, where t is a matrix of values between [0,1].
+func (cm CellMath) LerpDense(a, b float64, t *mat.Dense) *mat.Dense {
+	r, c := t.Dims()
+	result := mat.NewDense(r, c, nil)
+
+	t.Apply(func(i, j int, v float64) float64 {
+		if v < 0 || v > 1 {
+			log.Panicf("t at position (%d, %d) should be in [0,1], got %f", i, j, v)
+		}
+		result.Set(i, j, (1.0-v)*a+v*b)
+		return v
+	}, t)
+
+	return result
 }
 
 func (cm CellMath) MeshGrid(sizeY, sizeX int) (*mat.Dense, *mat.Dense) {
@@ -307,4 +364,47 @@ func (cm CellMath) ElementwiseMultiplyCDenseMatrices(A, B *mat.CDense) *mat.CDen
 		}
 	}
 	return result
+}
+
+func sliceToCDense(slice [][]complex128) *mat.CDense {
+	rows := len(slice)
+	cols := len(slice[0])
+	data := make([]complex128, 0, rows*cols)
+	for _, row := range slice {
+		data = append(data, row...)
+	}
+	B := mat.NewCDense(rows, cols, data)
+	return B
+}
+
+func cdenseToSlice(A *mat.CDense) [][]complex128 {
+	r, c := A.Dims()
+	result := make([][]complex128, r)
+	for i := range result {
+		result[i] = make([]complex128, c)
+		for j := range result[i] {
+			result[i][j] = A.At(i, j)
+		}
+	}
+	return result
+}
+
+func (cm CellMath) ifft2(input *mat.CDense) *mat.CDense {
+	inputComplexArr := cdenseToSlice(input)
+	outputComplexArr := fft.IFFT2(inputComplexArr)
+	output := sliceToCDense(outputComplexArr)
+	return output
+}
+
+func (cm CellMath) RealPartCDenseMatrix(cd *mat.CDense) *mat.Dense {
+	r, c := cd.Dims()
+	realParts := mat.NewDense(r, c, nil)
+
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			realParts.Set(i, j, real(cd.At(i, j)))
+		}
+	}
+
+	return realParts
 }

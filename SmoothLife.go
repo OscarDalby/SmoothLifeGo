@@ -8,7 +8,7 @@ func ConstructSmoothLife(cm CellMath, mp Multipliers, br BasicRules, width int, 
 		height: height,
 		cm:     cm,
 		mp:     mp,
-		br:     br,
+		rules:  br,
 	}
 }
 
@@ -17,7 +17,7 @@ type SmoothLife struct {
 	height int
 	cm     CellMath
 	mp     Multipliers
-	br     BasicRules
+	rules  BasicRules
 	field  *mat.CDense
 }
 
@@ -31,26 +31,15 @@ func (sl SmoothLife) Step() {
 	var mBuffer = sl.cm.ElementwiseMultiplyCDenseMatrices(newField, sl.mp.M)
 	var nBuffer = sl.cm.ElementwiseMultiplyCDenseMatrices(newField, sl.mp.N)
 
-	// var _mBuffer = sl.cm.InverseFft2(mBuffer)
-	// var _nBuffer = sl.cm.InverseFft2(mBuffer)
+	var _mBuffer = sl.cm.ifft2(mBuffer)
+	var _nBuffer = sl.cm.ifft2(nBuffer)
 
-	// var realMBuffer = sl.cm.RealPartCDenseMatrix(_mBuffer)
-	// var realNBuffer = sl.cm.RealPartCDenseMatrix(_nBuffer)
+	var realMBuffer = sl.cm.RealPartCDenseMatrix(_mBuffer)
+	var realNBuffer = sl.cm.RealPartCDenseMatrix(_nBuffer)
+
+	sl.field = sl.rules.S(sl.cm, realNBuffer, realMBuffer)
 }
 
-//     def step(self):
-//         """Do timestep and return field"
-
-//         # To sum up neighbors, do kernel convolutions
-//         # by multiplying in the frequency domain
-//         # and converting back to spacial domain
-//         field_ = np.fft.fft2(self.field)
-//         M_buffer_ = field_ * self.multipliers.M
-//         N_buffer_ = field_ * self.multipliers.N
-//         M_buffer = np.real(np.fft.ifft2(M_buffer_))
-//         N_buffer = np.real(np.fft.ifft2(N_buffer_))
-
-//         # Apply transition rules
 //         self.field = self.rules.s(N_buffer, M_buffer, self.field)
 //         return self.field
 
