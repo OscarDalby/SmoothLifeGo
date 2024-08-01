@@ -1,22 +1,30 @@
 package main
 
-import "gonum.org/v1/gonum/mat"
+import (
+	"gonum.org/v1/gonum/mat"
+)
 
-func ConstructSmoothLife(cm CellMath, mp Multipliers, br BasicRules, width int, height int) *SmoothLife {
-	return &SmoothLife{
+func ConstructSmoothLife(cm CellMath, mp *Multipliers, br BasicRules, width int, height int) *SmoothLife {
+	sl := &SmoothLife{
 		width:  width,
 		height: height,
 		cm:     cm,
 		mp:     mp,
 		rules:  br,
 	}
+	sl.field = mat.NewCDense(sl.height, sl.width, nil)
+	sl.field.Zero()
+	if sl.field == nil {
+		panic("here the field is nil!")
+	}
+	return sl
 }
 
 type SmoothLife struct {
 	width  int
 	height int
 	cm     CellMath
-	mp     Multipliers
+	mp     *Multipliers
 	rules  BasicRules
 	field  *mat.CDense
 }
@@ -41,9 +49,6 @@ func (sl SmoothLife) Step() *mat.CDense {
 	sl.field = sl.cm.ConvertDenseToCDense(sl.rules.S(sl.cm, realNBuffer, realMBuffer))
 	return sl.field
 }
-
-//         self.field = self.rules.s(N_buffer, M_buffer, self.field)
-//         return self.field
 
 //     def add_speckles(self, count=None, intensity=1):
 //         """Populate field with random living squares

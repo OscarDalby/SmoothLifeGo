@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"math/cmplx"
@@ -364,11 +365,14 @@ func (cm CellMath) DivideDenseMatrix(A *mat.Dense, divisor float64) *mat.Dense {
 
 // ElementwiseMultiplyCDenseMatrices multiplies two complex matrices element-wise.
 func (cm CellMath) ElementwiseMultiplyCDenseMatrices(A, B *mat.CDense) *mat.CDense {
+	// ElementwiseMultiplyCDenseMatrices(newField, sl.mp.M)
+	// ElementwiseMultiplyCDenseMatrices(newField, sl.mp.N)
 	r, c := A.Dims()
+	fmt.Printf("r,c in newField: %v, %v", r, c)
 
 	rB, cB := B.Dims()
 	if r != rB || c != cB {
-		panic("matrices are of different dimensions")
+		panic("ElementwiseMultiplyCDenseMatrices matrices are of different dimensions")
 	}
 
 	result := mat.NewCDense(r, c, nil)
