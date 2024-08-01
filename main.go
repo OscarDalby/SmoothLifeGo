@@ -55,6 +55,11 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 func main() {
 	cm := CellMath{}
 	radius := 7.0
+	// mp := ConstructMultipliers(cm, radius)
+	// width := 3
+	// height := 3
+	// br := BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
+	// sl := ConstructSmoothLife(cm, mp, br, width, height)
 	logres := 0.0
 	matrix := cm.AntialiasedCircle(screenWidth, screenHeight, radius, true, logres)
 	game := NewGame(screenWidth, screenHeight, matrix)

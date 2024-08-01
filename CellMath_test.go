@@ -3,6 +3,8 @@ package main
 import (
 	"math"
 	"testing"
+
+	"gonum.org/v1/gonum/mat"
 )
 
 var cm CellMath = CellMath{}
@@ -124,6 +126,53 @@ func TestLerp(t *testing.T) {
 			result := cm.Lerp(tc.a, tc.b, tc.t)
 			if !almostEqual(result, tc.expected, 1e-5) {
 				t.Errorf("Lerp(%v, %v, %v) = %v; want %v", tc.a, tc.b, tc.t, result, tc.expected)
+			}
+		})
+	}
+}
+
+func TestSumDenseMatrix(t *testing.T) {
+	cases := []struct {
+		name            string
+		testDenseMatrix *mat.Dense
+		expected        float64
+	}{
+		{"Summing a dense matrix", mat.NewDense(1, 2, []float64{1, 2}), 3.0},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := cm.SumDenseMatrix(tc.testDenseMatrix)
+			if !almostEqual(result, tc.expected, 1e-5) {
+				t.Errorf("SumDenseMatrix(%v) = %v want %v", tc.testDenseMatrix, result, tc.expected)
+			}
+		})
+	}
+}
+
+type DenseMatrixIterationTestCase struct {
+	matrix        *mat.Dense
+	operatorValue float64
+}
+
+func TestDivideDenseMatrix(t *testing.T) {
+	cases := []struct {
+		name     string
+		testData DenseMatrixIterationTestCase
+		expected *mat.Dense
+	}{
+		{
+			"Dividing a dense matrix",
+			DenseMatrixIterationTestCase{matrix: mat.NewDense(1, 2, []float64{1, 2}), operatorValue: 2.0},
+			mat.NewDense(1, 2, []float64{0.5, 1}),
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			result := cm.DivideDenseMatrix(tc.testData.matrix, tc.testData.operatorValue)
+			if !mat.Equal(result, tc.expected) {
+				t.Errorf("DivideDenseMatrix(%v, %v) = %v want %v", tc.testData.matrix, tc.testData.operatorValue, result, tc.expected)
 			}
 		})
 	}

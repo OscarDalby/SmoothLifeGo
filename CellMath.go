@@ -90,7 +90,7 @@ func (cm CellMath) RandomRandint(low, high int) int {
 	return rnd.Intn(high-low) + low
 }
 
-func (cm CellMath) Fft2(input *mat.CDense, rows, cols int) *mat.Dense {
+func (cm CellMath) Fft2RealOut(input *mat.CDense, rows, cols int) *mat.Dense {
 	ft := sfft.NewFFT2(rows, cols)
 	ftData := ft.FFT(input.RawCMatrix().Data)
 	ftMat := mat.NewCDense(rows, cols, ftData)
@@ -103,6 +103,36 @@ func (cm CellMath) Fft2(input *mat.CDense, rows, cols int) *mat.Dense {
 		}
 	}
 	return amp
+}
+
+func (cm CellMath) Fft2(input *mat.CDense) *mat.CDense {
+	r, c := input.Dims()
+
+	fft := sfft.NewFFT2(r, c)
+	data := make([]complex128, r*c)
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			var comp complex128 = input.At(i, j)
+			realPart := real(comp)
+			imagPart := imag(comp)
+			data[i*c+j] = complex(realPart, imagPart)
+		}
+	}
+	output := fft.FFT(data)
+	return mat.NewCDense(r, c, output)
+}
+
+func (cm CellMath) Fft2RealIn(input *mat.Dense) *mat.CDense {
+	r, c := input.Dims()
+	fft := sfft.NewFFT2(r, c)
+	data := make([]complex128, r*c)
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			data[i*c+j] = complex(input.At(i, j), 0)
+		}
+	}
+	output := fft.FFT(data)
+	return mat.NewCDense(r, c, output)
 }
 
 // LogisticThreshold computes the sigmoid curve of a provided x, with alpha adjusting
@@ -231,4 +261,29 @@ func (cm CellMath) RollMatrix(input *mat.Dense, shiftY, shiftX int) *mat.Dense {
 	}
 
 	return output
+}
+
+func (cm CellMath) SumDenseMatrix(values *mat.Dense) float64 {
+	var total float64
+	r, c := values.Dims()
+
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			total += values.At(i, j)
+		}
+	}
+	return total
+}
+
+func (cm CellMath) DivideDenseMatrix(A *mat.Dense, divisor float64) *mat.Dense {
+	r, c := A.Dims()
+	result := mat.NewDense(r, c, nil)
+
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			val := A.At(i, j)
+			result.Set(i, j, val/divisor)
+		}
+	}
+	return result
 }

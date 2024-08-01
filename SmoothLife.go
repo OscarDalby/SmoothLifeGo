@@ -1,10 +1,14 @@
 package main
 
-func ConstructSmoothLife(width int, height int) *SmoothLife {
+import "gonum.org/v1/gonum/mat"
+
+func ConstructSmoothLife(cm CellMath, mp Multipliers, br BasicRules, width int, height int) *SmoothLife {
 	return &SmoothLife{
 		width:  width,
 		height: height,
-		cm:     CellMath{},
+		cm:     cm,
+		mp:     mp,
+		br:     br,
 	}
 }
 
@@ -12,30 +16,21 @@ type SmoothLife struct {
 	width  int
 	height int
 	cm     CellMath
+	mp     Multipliers
+	br     BasicRules
+	field  *mat.CDense
 }
 
 func (sl SmoothLife) Clear() {
-
+	sl.field = mat.NewCDense(sl.height, sl.width, nil)
 }
 
 func (sl SmoothLife) Step() {
-
+	var newField *mat.CDense = sl.cm.Fft2(sl.field)
 }
 
-// class SmoothLife:
-//     def __init__(self, height, width):
-//         self.width = width
-//         self.height = height
-//         self.multipliers = Multipliers((height, width))
-//         self.rules = BasicRules()
-//         self.clear()
-//     def clear(self):
-//         """Zero out the field"""
-//         self.field = np.zeros((self.height, self.width))
-//         self.rules.clear()
-
 //     def step(self):
-//         """Do timestep and return field"""
+//         """Do timestep and return field"
 
 //         # To sum up neighbors, do kernel convolutions
 //         # by multiplying in the frequency domain
