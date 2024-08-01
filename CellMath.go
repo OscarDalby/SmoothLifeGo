@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"math/cmplx"
@@ -263,7 +262,7 @@ func (cm CellMath) LinearisedInterval(x float64, a float64, b float64, alpha flo
 // Linear interpolate from a -> b with t in [0,1]
 func (cm CellMath) Lerp(a, b, t float64) float64 {
 	if t < 0 || t > 1 {
-		panic("t should be in [0,1]")
+		panic("Lerp: t should be in [0,1]")
 	}
 	return (1.0-t)*a + t*b
 }
@@ -275,7 +274,7 @@ func (cm CellMath) LerpDense(a, b float64, t *mat.Dense) *mat.Dense {
 
 	t.Apply(func(i, j int, v float64) float64 {
 		if v < 0 || v > 1 {
-			log.Panicf("t at position (%d, %d) should be in [0,1], got %f", i, j, v)
+			log.Panicf("LerpDense: t at position (%d, %d) should be in [0,1], got %f", i, j, v)
 		}
 		result.Set(i, j, (1.0-v)*a+v*b)
 		return v
@@ -365,20 +364,16 @@ func (cm CellMath) DivideDenseMatrix(A *mat.Dense, divisor float64) *mat.Dense {
 
 // ElementwiseMultiplyCDenseMatrices multiplies two complex matrices element-wise.
 func (cm CellMath) ElementwiseMultiplyCDenseMatrices(A, B *mat.CDense) *mat.CDense {
-	// ElementwiseMultiplyCDenseMatrices(newField, sl.mp.M)
-	// ElementwiseMultiplyCDenseMatrices(newField, sl.mp.N)
-	r, c := A.Dims()
-	fmt.Printf("r,c in newField: %v, %v", r, c)
-
+	rA, cA := A.Dims()
 	rB, cB := B.Dims()
-	if r != rB || c != cB {
-		panic("ElementwiseMultiplyCDenseMatrices matrices are of different dimensions")
+	if rA != rB || cA != cB {
+		panic("ElementwiseMultiplyCDenseMatrices: Matrices are of different dimensions")
 	}
 
-	result := mat.NewCDense(r, c, nil)
+	result := mat.NewCDense(rA, cA, nil)
 
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
+	for i := 0; i < rA; i++ {
+		for j := 0; j < cA; j++ {
 			valA := A.At(i, j)
 			valB := B.At(i, j)
 			result.Set(i, j, complex(real(valA)*real(valB)-imag(valA)*imag(valB), real(valA)*imag(valB)+imag(valA)*real(valB)))
@@ -438,7 +433,7 @@ func (cm CellMath) LogisticThresholdDenseDoubleElementWise(x, x0 *mat.Dense, alp
 	result := mat.NewDense(rows, cols, nil)
 
 	if x0x, x0y := x0.Dims(); x0x != rows || x0y != cols {
-		log.Panic("Dimensions of x and x0 must be the same")
+		log.Panic("LogisticThresholdDenseDoubleElementWise: Dimensions of x and x0 must be the same")
 	}
 
 	for i := 0; i < rows; i++ {
@@ -457,10 +452,10 @@ func (cm CellMath) LogisticIntervalTripleDense(n, a, b *mat.Dense, alpha float64
 	aRows, aCols := a.Dims()
 	bRows, bCols := b.Dims()
 	if nRows != aRows || nCols != aCols {
-		log.Panic("Dimensions of n and a must match")
+		log.Panic("LogisticIntervalTripleDense: Dimensions of n and a must match")
 	}
 	if nRows != bRows || nCols != bCols {
-		log.Panic("Dimensions of n and b must match")
+		log.Panic("LogisticIntervalTripleDense: Dimensions of n and b must match")
 	}
 	thresholdA := cm.LogisticThresholdDenseDoubleElementWise(n, a, alpha)
 	thresholdB := cm.LogisticThresholdDenseDoubleElementWise(n, b, alpha)

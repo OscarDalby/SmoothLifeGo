@@ -16,9 +16,10 @@ type Multipliers struct {
 func ConstructMultipliers(
 	cm CellMath,
 	innerRadius float64,
+	width int,
+	height int,
+	logres float64,
 ) *Multipliers {
-	logres := 0.5
-	height, width := 1<<9, 1<<9 // 1<<9 == 512
 	outerRadius := 3 * innerRadius
 	inner := cm.AntialiasedCircle(width, height, innerRadius, true, logres)
 	outer := cm.AntialiasedCircle(width, height, outerRadius, true, logres)

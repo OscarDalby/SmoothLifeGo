@@ -7,9 +7,7 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-var cm CellMath = CellMath{}
-
-// Helper function to compare floats
+// almostEqual compares floats with a tolerance
 func almostEqual(a, b, tolerance float64) bool {
 	return math.Abs(a-b) <= tolerance
 }
@@ -177,3 +175,46 @@ func TestDivideDenseMatrix(t *testing.T) {
 		})
 	}
 }
+
+// func TestElementwiseMultiplyCDenseMatrices(t *testing.T) {
+// 	cases := []struct {
+// 		name     string
+// 		testData DenseMatrixIterationTestCase
+// 		expected *mat.Dense
+// 	}{
+// 		{
+// 			"Dividing a dense matrix",
+// 			DenseMatrixIterationTestCase{matrix: mat.NewDense(1, 2, []float64{1, 2}), operatorValue: 2.0},
+// 			mat.NewDense(1, 2, []float64{0.5, 1}),
+// 		},
+// 	}
+
+// 	for _, tc := range cases {
+// 		t.Run(tc.name, func(t *testing.T) {
+// 			result := cm.DivideDenseMatrix(tc.testData.matrix, tc.testData.operatorValue)
+// 			if !mat.Equal(result, tc.expected) {
+// 				t.Errorf("DivideDenseMatrix(%v, %v) = %v want %v", tc.testData.matrix, tc.testData.operatorValue, result, tc.expected)
+// 			}
+// 		})
+// 	}
+// }
+
+// ElementwiseMultiplyCDenseMatrices multiplies two complex matrices element-wise.
+// func (cm CellMath) ElementwiseMultiplyCDenseMatrices(A, B *mat.CDense) *mat.CDense {
+// 	rA, cA := A.Dims()
+// 	rB, cB := B.Dims()
+// 	if rA != rB || cA != cB {
+// 		panic("ElementwiseMultiplyCDenseMatrices matrices are of different dimensions")
+// 	}
+
+// 	result := mat.NewCDense(rA, cA, nil)
+
+// 	for i := 0; i < rA; i++ {
+// 		for j := 0; j < cA; j++ {
+// 			valA := A.At(i, j)
+// 			valB := B.At(i, j)
+// 			result.Set(i, j, complex(real(valA)*real(valB)-imag(valA)*imag(valB), real(valA)*imag(valB)+imag(valA)*real(valB)))
+// 		}
+// 	}
+// 	return result
+// }
