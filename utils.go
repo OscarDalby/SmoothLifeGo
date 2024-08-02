@@ -16,7 +16,13 @@ type Number interface {
 	int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64
 }
 
-func Exp(values []float64) []float64 {
+// almostEqual compares floats with a tolerance
+func almostEqual(a float64, b float64, tolerance float64) bool {
+	return math.Abs(a-b) <= tolerance
+}
+
+// gets e**x for every ele in a slice
+func ExpSlice(values []float64) []float64 {
 	result := make([]float64, len(values))
 	for i, v := range values {
 		result[i] = math.Exp(v)
@@ -37,21 +43,23 @@ func Greater(a, b []int) []bool {
 	return result
 }
 
-func Clip(values []int, min, max int) []int {
-	clipped := make([]int, len(values))
+// Clamps every element in a slice
+func ClampSlice(values []int, min int, max int) []int {
+	clamped := make([]int, len(values))
 	for i, v := range values {
 		if v < min {
-			clipped[i] = min
+			clamped[i] = min
 		} else if v > max {
-			clipped[i] = max
+			clamped[i] = max
 		} else {
-			clipped[i] = v
+			clamped[i] = v
 		}
 	}
-	return clipped
+	return clamped
 }
 
-func Sqrt(slice []float64) []float64 {
+// Gets the sqrt of every element in an array
+func SqrtSlice(slice []float64) []float64 {
 	result := make([]float64, len(slice))
 	for i, val := range slice {
 		result[i] = math.Sqrt(val)
@@ -324,7 +332,7 @@ func AntialiasedCircle(sizeX int, sizeY int, radius float64, roll bool, logres f
 	return logistic
 }
 
-func RollMatrix(input *mat.Dense, shiftY, shiftX int) *mat.Dense {
+func RollMatrix(input *mat.Dense, shiftY int, shiftX int) *mat.Dense {
 	r, c := input.Dims()
 	output := mat.NewDense(r, c, nil)
 

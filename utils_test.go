@@ -1,16 +1,10 @@
 package main
 
 import (
-	"math"
 	"testing"
 
 	"gonum.org/v1/gonum/mat"
 )
-
-// almostEqual compares floats with a tolerance
-func almostEqual(a, b, tolerance float64) bool {
-	return math.Abs(a-b) <= tolerance
-}
 
 func TestLogisticThreshold(t *testing.T) {
 	cases := []struct {
