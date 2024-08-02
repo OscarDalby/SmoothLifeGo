@@ -488,3 +488,16 @@ func (cm CellMath) ConvertDenseToCDense(input *mat.Dense) *mat.CDense {
 	}
 	return output
 }
+
+// Add this function to your CellMath type to handle adding a constant
+func (cm CellMath) AddConstantDense(a *mat.Dense, constant float64) *mat.Dense {
+	rows, cols := a.Dims()
+	result := mat.NewDense(rows, cols, nil)
+	for i := 0; i < rows; i++ {
+		for j := 0; j < cols; j++ {
+			val := a.At(i, j) + constant
+			result.Set(i, j, val)
+		}
+	}
+	return result
+}

@@ -28,5 +28,6 @@ func (br BasicRules) S(cm CellMath, n *mat.Dense, m *mat.Dense) *mat.Dense {
 	// Now with the smoothness of `logisticInterval` determine if the neighbor density is
 	// inside of the threshold to stay/become alive.
 	newAliveness := cm.LogisticIntervalTripleDense(n, threshold1, threshold2, br.N)
-	return cm.ClampDense(newAliveness, 0, 1)
+	boostedAliveness := cm.AddConstantDense(newAliveness, 0.6)
+	return cm.ClampDense(boostedAliveness, 0, 1)
 }
