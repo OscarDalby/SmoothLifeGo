@@ -308,17 +308,19 @@ func MeshGrid(sizeY, sizeX int) (*mat.Dense, *mat.Dense) {
 }
 
 func AntialiasedCircle(sizeX int, sizeY int, radius float64, roll bool, logres float64) *mat.Dense {
-	yy, xx := MeshGrid(sizeY, sizeX)
-	logistic := mat.NewDense(sizeY, sizeX, nil)
-
 	if logres == 0 {
 		logres = math.Log2(math.Min(float64(sizeX), float64(sizeY)))
 	}
 
+	halfX := float64(sizeX) / 2
+	halfY := float64(sizeY) / 2
+
+	logistic := mat.NewDense(sizeY, sizeX, nil)
+
 	for i := 0; i < sizeY; i++ {
 		for j := 0; j < sizeX; j++ {
-			x := float64(xx.At(i, j)) - float64(sizeX)/2
-			y := float64(yy.At(i, j)) - float64(sizeY)/2
+			x := float64(j) - halfX
+			y := float64(i) - halfY
 			r := math.Sqrt(x*x + y*y)
 			expValue := logres * (r - radius)
 			logistic.Set(i, j, 1/(1+math.Exp(expValue)))
