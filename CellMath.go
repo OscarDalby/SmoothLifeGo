@@ -12,10 +12,11 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-type CellMath struct {
+type Number interface {
+	int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64
 }
 
-func (cm CellMath) Exp(values []float64) []float64 {
+func Exp(values []float64) []float64 {
 	result := make([]float64, len(values))
 	for i, v := range values {
 		result[i] = math.Exp(v)
@@ -23,7 +24,8 @@ func (cm CellMath) Exp(values []float64) []float64 {
 	return result
 }
 
-func (cm CellMath) Greater(a, b []int) []bool {
+// Greater does an element wise greater than and returns a slice of bools containing a[i] > b[i]
+func Greater(a, b []int) []bool {
 	length := len(a)
 	if len(b) < length {
 		length = len(b)
@@ -35,7 +37,7 @@ func (cm CellMath) Greater(a, b []int) []bool {
 	return result
 }
 
-func (cm CellMath) Clip(values []int, min, max int) []int {
+func Clip(values []int, min, max int) []int {
 	clipped := make([]int, len(values))
 	for i, v := range values {
 		if v < min {
@@ -49,7 +51,7 @@ func (cm CellMath) Clip(values []int, min, max int) []int {
 	return clipped
 }
 
-func (cm CellMath) Sqrt(slice []float64) []float64 {
+func Sqrt(slice []float64) []float64 {
 	result := make([]float64, len(slice))
 	for i, val := range slice {
 		result[i] = math.Sqrt(val)
@@ -57,7 +59,7 @@ func (cm CellMath) Sqrt(slice []float64) []float64 {
 	return result
 }
 
-func (cm CellMath) Roll(slice []int, shift int) []int {
+func Roll(slice []int, shift int) []int {
 	n := len(slice)
 	if n == 0 {
 		return slice
@@ -66,7 +68,7 @@ func (cm CellMath) Roll(slice []int, shift int) []int {
 	return append(slice[n-shift:], slice[:n-shift]...)
 }
 
-func (cm CellMath) Sum(slice []int) int {
+func Sum(slice []int) int {
 	total := 0
 	for _, value := range slice {
 		total += value
@@ -74,11 +76,11 @@ func (cm CellMath) Sum(slice []int) int {
 	return total
 }
 
-func (cm CellMath) Zeros(length int) []float64 {
+func Zeros(length int) []float64 {
 	return make([]float64, length)
 }
 
-func (cm CellMath) Real(complexSlice []complex128) []float64 {
+func Real(complexSlice []complex128) []float64 {
 	realParts := make([]float64, len(complexSlice))
 	for i, c := range complexSlice {
 		realParts[i] = real(c)
@@ -86,13 +88,13 @@ func (cm CellMath) Real(complexSlice []complex128) []float64 {
 	return realParts
 }
 
-func (cm CellMath) RandomRandint(low, high int) int {
+func RandomRandint(low, high int) int {
 	src := rand.NewSource(time.Now().UnixNano())
 	rnd := rand.New(src)
 	return rnd.Intn(high-low) + low
 }
 
-func (cm CellMath) Fft2RealOut(input *mat.CDense, rows, cols int) *mat.Dense {
+func Fft2RealOut(input *mat.CDense, rows, cols int) *mat.Dense {
 	ft := sfft.NewFFT2(rows, cols)
 	ftData := ft.FFT(input.RawCMatrix().Data)
 	ftMat := mat.NewCDense(rows, cols, ftData)
@@ -107,7 +109,7 @@ func (cm CellMath) Fft2RealOut(input *mat.CDense, rows, cols int) *mat.Dense {
 	return amp
 }
 
-func (cm CellMath) Fft2(input *mat.CDense) *mat.CDense {
+func Fft2(input *mat.CDense) *mat.CDense {
 	r, c := input.Dims()
 
 	fft := sfft.NewFFT2(r, c)
@@ -124,7 +126,7 @@ func (cm CellMath) Fft2(input *mat.CDense) *mat.CDense {
 	return mat.NewCDense(r, c, output)
 }
 
-func (cm CellMath) Fft2RealIn(input *mat.Dense) *mat.CDense {
+func Fft2RealIn(input *mat.Dense) *mat.CDense {
 	r, c := input.Dims()
 	fft := sfft.NewFFT2(r, c)
 	data := make([]complex128, r*c)
@@ -141,7 +143,7 @@ func (cm CellMath) Fft2RealIn(input *mat.Dense) *mat.CDense {
 // the steepness and direction of the transition.
 // Used to smoothly transition from near 0 -> 1 as x moves from left to right past x0, with alpha
 // a parameter to determine how abruptly this change occurs
-func (CellMath CellMath) LogisticThreshold(x float64, x0 float64, alpha float64) float64 {
+func LogisticThreshold(x float64, x0 float64, alpha float64) float64 {
 	return 1.0 / (1.0 + math.Exp(-4.0/alpha*(x-x0)))
 }
 
@@ -149,10 +151,10 @@ func (CellMath CellMath) LogisticThreshold(x float64, x0 float64, alpha float64)
 // the steepness and direction of the transition.
 // Used to smoothly transition from near 0 -> 1 as x moves from left to right past x0, with alpha
 // a parameter to determine how abruptly this change occurs
-func (cm CellMath) LogisticThresholdElementWise(x []float64, x0 float64, alpha float64) []float64 {
+func LogisticThresholdElementWise(x []float64, x0 float64, alpha float64) []float64 {
 	result := make([]float64, len(x))
 	for i, x := range x {
-		result[i] = cm.LogisticThreshold(x, x0, alpha)
+		result[i] = LogisticThreshold(x, x0, alpha)
 	}
 	return result
 }
@@ -162,56 +164,56 @@ func (cm CellMath) LogisticThresholdElementWise(x []float64, x0 float64, alpha f
 // x < a		: 0
 // a < x < b 	: 1
 // a > b		: 0
-func (cm CellMath) LogisticInterval(x float64, a float64, b float64, alpha float64) float64 {
-	return cm.LogisticThreshold(x, a, alpha) * (1.0 - cm.LogisticThreshold(x, b, alpha))
+func LogisticInterval(x float64, a float64, b float64, alpha float64) float64 {
+	return LogisticThreshold(x, a, alpha) * (1.0 - LogisticThreshold(x, b, alpha))
 }
 
 // LogisticIntervalElementWise computes the LogisticInterval function on a slice of x values between a and b with transition width alpha
 // Element-wise version of LogisticInterval that handles slices of float64.
 // This function is useful for performing vectorized-like operations in scenarios where input x is a sequence of values.
-func (cm CellMath) LogisticIntervalElementWise(x []float64, a float64, b float64, alpha float64) []float64 {
+func LogisticIntervalElementWise(x []float64, a float64, b float64, alpha float64) []float64 {
 	result := make([]float64, len(x))
 	for i, xi := range x {
-		result[i] = cm.LogisticInterval(xi, a, b, alpha)
+		result[i] = LogisticInterval(xi, a, b, alpha)
 	}
 	return result
 }
 
 // LogisticThresholdElementWise applies LogisticThreshold to each element of x in a mat.Dense matrix.
-func (cm CellMath) LogisticThresholdDenseElementWise(x *mat.Dense, x0 float64, alpha float64) *mat.Dense {
+func LogisticThresholdDenseElementWise(x *mat.Dense, x0 float64, alpha float64) *mat.Dense {
 	rows, cols := x.Dims()
 	result := mat.NewDense(rows, cols, nil)
 
 	for i := 0; i < rows; i++ {
 		for j := 0; j < cols; j++ {
 			xi := x.At(i, j)
-			result.Set(i, j, cm.LogisticThreshold(xi, x0, alpha))
+			result.Set(i, j, LogisticThreshold(xi, x0, alpha))
 		}
 	}
 	return result
 }
 
 // LogisticIntervalElementWise applies LogisticInterval to each element of x in a mat.Dense matrix.
-func (cm CellMath) LogisticIntervalDenseElementWise(x *mat.Dense, a float64, b float64, alpha float64) *mat.Dense {
+func LogisticIntervalDenseElementWise(x *mat.Dense, a float64, b float64, alpha float64) *mat.Dense {
 	rows, cols := x.Dims()
 	result := mat.NewDense(rows, cols, nil)
 
 	for i := 0; i < rows; i++ {
 		for j := 0; j < cols; j++ {
 			xi := x.At(i, j)
-			result.Set(i, j, cm.LogisticInterval(xi, a, b, alpha))
+			result.Set(i, j, LogisticInterval(xi, a, b, alpha))
 		}
 	}
 	return result
 }
 
 // Returns if arg1 is greater than arg2
-func (cm CellMath) HardThreshold(arg1 float64, arg2 float64) bool {
+func HardThreshold(arg1 float64, arg2 float64) bool {
 	return arg1 > arg2
 }
 
 // Clamp keeps a float64 within a range
-func (cm CellMath) Clamp(a float64, aMin float64, aMax float64) float64 {
+func Clamp(a float64, aMin float64, aMax float64) float64 {
 	var output float64 = a
 	if a < aMin {
 		output = aMin
@@ -222,7 +224,7 @@ func (cm CellMath) Clamp(a float64, aMin float64, aMax float64) float64 {
 }
 
 // ClampDense applies the clamp operation to each element of the matrix a
-func (cm CellMath) ClampDense(a *mat.Dense, aMin float64, aMax float64) *mat.Dense {
+func ClampDense(a *mat.Dense, aMin float64, aMax float64) *mat.Dense {
 	rows, cols := a.Dims()
 	result := mat.NewDense(rows, cols, nil)
 
@@ -230,24 +232,24 @@ func (cm CellMath) ClampDense(a *mat.Dense, aMin float64, aMax float64) *mat.Den
 	for i := 0; i < rows; i++ {
 		for j := 0; j < cols; j++ {
 			val := a.At(i, j)
-			clampedValue := cm.Clamp(val, aMin, aMax)
+			clampedValue := Clamp(val, aMin, aMax)
 			result.Set(i, j, clampedValue)
 		}
 	}
 	return result
 }
 
-func (cm CellMath) LinearisedThresholdElementWise(x []float64, x0 float64, alpha float64) []float64 {
+func LinearisedThresholdElementWise(x []float64, x0 float64, alpha float64) []float64 {
 	result := make([]float64, len(x))
 	for i, x := range x {
-		result[i] = cm.LinearisedThreshold(x, x0, alpha)
+		result[i] = LinearisedThreshold(x, x0, alpha)
 	}
 	return result
 }
 
 // Threshold x around x0 with a linear transition region alpha
-func (cm CellMath) LinearisedThreshold(x float64, x0 float64, alpha float64) float64 {
-	return cm.Clamp((x-x0)/alpha+0.5, 0, 1)
+func LinearisedThreshold(x float64, x0 float64, alpha float64) float64 {
+	return Clamp((x-x0)/alpha+0.5, 0, 1)
 }
 
 // a<x<b with linearised threshold regions
@@ -255,12 +257,12 @@ func (cm CellMath) LinearisedThreshold(x float64, x0 float64, alpha float64) flo
 // x < a		: 0
 // a < x < b 	: 1
 // a > b		: 0
-func (cm CellMath) LinearisedInterval(x float64, a float64, b float64, alpha float64) float64 {
-	return cm.LinearisedThreshold(x, a, alpha) * (1.0 - cm.LinearisedThreshold(x, b, alpha))
+func LinearisedInterval(x float64, a float64, b float64, alpha float64) float64 {
+	return LinearisedThreshold(x, a, alpha) * (1.0 - LinearisedThreshold(x, b, alpha))
 }
 
 // Linear interpolate from a -> b with t in [0,1]
-func (cm CellMath) Lerp(a, b, t float64) float64 {
+func Lerp(a, b, t float64) float64 {
 	if t < 0 || t > 1 {
 		panic("Lerp: t should be in [0,1]")
 	}
@@ -268,7 +270,7 @@ func (cm CellMath) Lerp(a, b, t float64) float64 {
 }
 
 // Lerp performs linear interpolation between a and b, where t is a matrix of values between [0,1].
-func (cm CellMath) LerpDense(a, b float64, t *mat.Dense) *mat.Dense {
+func LerpDense(a, b float64, t *mat.Dense) *mat.Dense {
 	r, c := t.Dims()
 	result := mat.NewDense(r, c, nil)
 
@@ -283,7 +285,7 @@ func (cm CellMath) LerpDense(a, b float64, t *mat.Dense) *mat.Dense {
 	return result
 }
 
-func (cm CellMath) MeshGrid(sizeY, sizeX int) (*mat.Dense, *mat.Dense) {
+func MeshGrid(sizeY, sizeX int) (*mat.Dense, *mat.Dense) {
 	yy := mat.NewDense(sizeY, sizeX, nil)
 	xx := mat.NewDense(sizeY, sizeX, nil)
 
@@ -297,8 +299,8 @@ func (cm CellMath) MeshGrid(sizeY, sizeX int) (*mat.Dense, *mat.Dense) {
 	return yy, xx
 }
 
-func (cm CellMath) AntialiasedCircle(sizeX int, sizeY int, radius float64, roll bool, logres float64) *mat.Dense {
-	yy, xx := cm.MeshGrid(sizeY, sizeX)
+func AntialiasedCircle(sizeX int, sizeY int, radius float64, roll bool, logres float64) *mat.Dense {
+	yy, xx := MeshGrid(sizeY, sizeX)
 	logistic := mat.NewDense(sizeY, sizeX, nil)
 
 	if logres == 0 {
@@ -316,13 +318,13 @@ func (cm CellMath) AntialiasedCircle(sizeX int, sizeY int, radius float64, roll 
 	}
 
 	if roll {
-		logistic = cm.RollMatrix(logistic, sizeY/2, sizeX/2)
+		logistic = RollMatrix(logistic, sizeY/2, sizeX/2)
 	}
 
 	return logistic
 }
 
-func (cm CellMath) RollMatrix(input *mat.Dense, shiftY, shiftX int) *mat.Dense {
+func RollMatrix(input *mat.Dense, shiftY, shiftX int) *mat.Dense {
 	r, c := input.Dims()
 	output := mat.NewDense(r, c, nil)
 
@@ -337,7 +339,7 @@ func (cm CellMath) RollMatrix(input *mat.Dense, shiftY, shiftX int) *mat.Dense {
 	return output
 }
 
-func (cm CellMath) SumDenseMatrix(values *mat.Dense) float64 {
+func SumDenseMatrix(values *mat.Dense) float64 {
 	var total float64
 	r, c := values.Dims()
 
@@ -349,7 +351,7 @@ func (cm CellMath) SumDenseMatrix(values *mat.Dense) float64 {
 	return total
 }
 
-func (cm CellMath) DivideDenseMatrix(A *mat.Dense, divisor float64) *mat.Dense {
+func DivideDenseMatrix(A *mat.Dense, divisor float64) *mat.Dense {
 	r, c := A.Dims()
 	result := mat.NewDense(r, c, nil)
 
@@ -363,7 +365,7 @@ func (cm CellMath) DivideDenseMatrix(A *mat.Dense, divisor float64) *mat.Dense {
 }
 
 // ElementwiseMultiplyCDenseMatrices multiplies two complex matrices element-wise.
-func (cm CellMath) ElementwiseMultiplyCDenseMatrices(A, B *mat.CDense) *mat.CDense {
+func ElementwiseMultiplyCDenseMatrices(A, B *mat.CDense) *mat.CDense {
 	rA, cA := A.Dims()
 	rB, cB := B.Dims()
 	if rA != rB || cA != cB {
@@ -382,6 +384,7 @@ func (cm CellMath) ElementwiseMultiplyCDenseMatrices(A, B *mat.CDense) *mat.CDen
 	return result
 }
 
+// Helper function which
 func sliceToCDense(slice [][]complex128) *mat.CDense {
 	rows := len(slice)
 	cols := len(slice[0])
@@ -406,7 +409,7 @@ func cdenseToSlice(A *mat.CDense) [][]complex128 {
 }
 
 // ifft2 gets the inverse fast fourier transform of a CDense
-func (cm CellMath) ifft2(input *mat.CDense) *mat.CDense {
+func ifft2(input *mat.CDense) *mat.CDense {
 	inputComplexArr := cdenseToSlice(input)
 	outputComplexArr := fft.IFFT2(inputComplexArr)
 	output := sliceToCDense(outputComplexArr)
@@ -414,7 +417,7 @@ func (cm CellMath) ifft2(input *mat.CDense) *mat.CDense {
 }
 
 // RealPartCDenseMatrix gets the real part of a CDense and returns a Dense
-func (cm CellMath) RealPartCDenseMatrix(cd *mat.CDense) *mat.Dense {
+func RealPartCDenseMatrix(cd *mat.CDense) *mat.Dense {
 	r, c := cd.Dims()
 	realParts := mat.NewDense(r, c, nil)
 
@@ -428,7 +431,7 @@ func (cm CellMath) RealPartCDenseMatrix(cd *mat.CDense) *mat.Dense {
 }
 
 // LogisticThresholdDenseElementWise applies the LogisticThreshold to each element of x with corresponding x0 from matrix x0.
-func (cm CellMath) LogisticThresholdDenseDoubleElementWise(x, x0 *mat.Dense, alpha float64) *mat.Dense {
+func LogisticThresholdDenseDoubleElementWise(x, x0 *mat.Dense, alpha float64) *mat.Dense {
 	rows, cols := x.Dims()
 	result := mat.NewDense(rows, cols, nil)
 
@@ -440,14 +443,14 @@ func (cm CellMath) LogisticThresholdDenseDoubleElementWise(x, x0 *mat.Dense, alp
 		for j := 0; j < cols; j++ {
 			xi := x.At(i, j)
 			x0i := x0.At(i, j)
-			result.Set(i, j, cm.LogisticThreshold(xi, x0i, alpha))
+			result.Set(i, j, LogisticThreshold(xi, x0i, alpha))
 		}
 	}
 	return result
 }
 
 // LogisticIntervalDense computes the logistic interval using matrices n, a, and b, with a uniform alpha.
-func (cm CellMath) LogisticIntervalTripleDense(n, a, b *mat.Dense, alpha float64) *mat.Dense {
+func LogisticIntervalTripleDense(n, a, b *mat.Dense, alpha float64) *mat.Dense {
 	nRows, nCols := n.Dims()
 	aRows, aCols := a.Dims()
 	bRows, bCols := b.Dims()
@@ -457,8 +460,8 @@ func (cm CellMath) LogisticIntervalTripleDense(n, a, b *mat.Dense, alpha float64
 	if nRows != bRows || nCols != bCols {
 		log.Panic("LogisticIntervalTripleDense: Dimensions of n and b must match")
 	}
-	thresholdA := cm.LogisticThresholdDenseDoubleElementWise(n, a, alpha)
-	thresholdB := cm.LogisticThresholdDenseDoubleElementWise(n, b, alpha)
+	thresholdA := LogisticThresholdDenseDoubleElementWise(n, a, alpha)
+	thresholdB := LogisticThresholdDenseDoubleElementWise(n, b, alpha)
 	rows, cols := thresholdB.Dims()
 	invThresholdB := mat.NewDense(rows, cols, nil)
 	for i := 0; i < rows; i++ {
@@ -477,7 +480,7 @@ func (cm CellMath) LogisticIntervalTripleDense(n, a, b *mat.Dense, alpha float64
 }
 
 // ConvertDenseToCDense takes a *mat.Dense matrix and converts it to a *mat.CDense matrix.
-func (cm CellMath) ConvertDenseToCDense(input *mat.Dense) *mat.CDense {
+func ConvertDenseToCDense(input *mat.Dense) *mat.CDense {
 	rows, cols := input.Dims()
 	output := mat.NewCDense(rows, cols, nil)
 	for i := 0; i < rows; i++ {
@@ -489,8 +492,8 @@ func (cm CellMath) ConvertDenseToCDense(input *mat.Dense) *mat.CDense {
 	return output
 }
 
-// Add this function to your CellMath type to handle adding a constant
-func (cm CellMath) AddConstantDense(a *mat.Dense, constant float64) *mat.Dense {
+// Add a constant to every ele in a Dense
+func AddConstantDense(a *mat.Dense, constant float64) *mat.Dense {
 	rows, cols := a.Dims()
 	result := mat.NewDense(rows, cols, nil)
 	for i := 0; i < rows; i++ {

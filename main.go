@@ -18,13 +18,12 @@ const height int = 1 << 9
 const screenWidth = width
 const screenHeight = height
 
-var cm CellMath = CellMath{}
-var mp *Multipliers = ConstructMultipliers(cm, radius, width, height, logres)
+var mp *Multipliers = ConstructMultipliers(radius, width, height, logres)
 
 // var br BasicRules = BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
 // Birth range, survival range, sigmoid widths
 var br BasicRules = BasicRules{B1: 0.1, B2: 0.4, D1: 0.3, D2: 0.6, N: 0.1, M: 0.09}
-var sl *SmoothLife = ConstructSmoothLife(cm, mp, br, width, height)
+var sl *SmoothLife = ConstructSmoothLife(mp, br, width, height)
 
 var game *Game
 var matrix *mat.Dense
@@ -64,7 +63,7 @@ func (g *Game) Update() error {
 			index := y*g.img.Stride + x*4
 			val := newStep.At(y, x)
 			r, i := real(val), imag(val)
-			intensity := uint8(math.Round(r*32 + i*32))
+			intensity := uint8(math.Round(r*32+i*32)) * 2
 			pix[index], pix[index+1], pix[index+2], pix[index+3] = intensity, intensity, intensity, intensity
 		}
 	}

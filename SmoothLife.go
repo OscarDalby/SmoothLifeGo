@@ -8,15 +8,14 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-func ConstructSmoothLife(cm CellMath, mp *Multipliers, br BasicRules, width int, height int) *SmoothLife {
+func ConstructSmoothLife(mp *Multipliers, br BasicRules, width int, height int) *SmoothLife {
 	sl := &SmoothLife{
 		width:  width,
 		height: height,
-		cm:     cm,
 		mp:     mp,
 		rules:  br,
 	}
-	sl.field = mat.NewCDense(sl.height, sl.width, nil)
+	sl.field = mat.NewCDense(height, width, nil)
 	sl.field.Zero()
 	if sl.field == nil {
 		panic("here the field is nil!")
@@ -27,41 +26,40 @@ func ConstructSmoothLife(cm CellMath, mp *Multipliers, br BasicRules, width int,
 type SmoothLife struct {
 	width  int
 	height int
-	cm     CellMath
 	mp     *Multipliers
 	rules  BasicRules
 	field  *mat.CDense
 }
 
 func (sl SmoothLife) Clear() {
-	sl.field = mat.NewCDense(sl.height, sl.width, nil)
+	sl.field = mat.NewCDense(height, width, nil)
 	sl.field.Zero()
 }
 
 func (sl SmoothLife) Step() *mat.CDense {
-	var newField *mat.CDense = sl.cm.Fft2(sl.field)
+	var newField *mat.CDense = Fft2(sl.field)
 
-	var mBuffer = sl.cm.ElementwiseMultiplyCDenseMatrices(newField, sl.mp.M)
-	var nBuffer = sl.cm.ElementwiseMultiplyCDenseMatrices(newField, sl.mp.N)
+	var mBuffer = ElementwiseMultiplyCDenseMatrices(newField, mp.M)
+	var nBuffer = ElementwiseMultiplyCDenseMatrices(newField, mp.N)
 
-	var _mBuffer = sl.cm.ifft2(mBuffer)
-	var _nBuffer = sl.cm.ifft2(nBuffer)
+	var _mBuffer = ifft2(mBuffer)
+	var _nBuffer = ifft2(nBuffer)
 
-	var realMBuffer = sl.cm.RealPartCDenseMatrix(_mBuffer)
-	var realNBuffer = sl.cm.RealPartCDenseMatrix(_nBuffer)
+	var realMBuffer = RealPartCDenseMatrix(_mBuffer)
+	var realNBuffer = RealPartCDenseMatrix(_nBuffer)
 
-	sl.field = sl.cm.ConvertDenseToCDense(sl.rules.S(sl.cm, realNBuffer, realMBuffer))
+	sl.field = ConvertDenseToCDense(sl.rules.S(realNBuffer, realMBuffer))
 	return sl.field
 }
 
 func (sl SmoothLife) AddSpeckles() {
 	rand.New(rand.NewSource(time.Now().Unix()))
-	var count int = int(float64(sl.width*sl.height) / math.Pow(float64(mp.outerRadius*2), 2))
+	var count int = int(float64(width*height) / math.Pow(float64(mp.outerRadius*2), 2))
 	var intensity complex128 = 1.0 + 1i
 	for i := 0; i < count; i++ {
 		var radius int = int(mp.outerRadius)
-		row := rand.Intn(sl.height - radius)
-		col := rand.Intn(sl.width - radius)
+		row := rand.Intn(height - radius)
+		col := rand.Intn(width - radius)
 		for dr := 0; dr < radius; dr++ {
 			for dc := 0; dc < radius; dc++ {
 				sl.field.Set(row+dr, col+dc, intensity)

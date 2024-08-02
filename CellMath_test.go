@@ -29,7 +29,7 @@ func TestLogisticThreshold(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := cm.LogisticThreshold(tc.x, tc.x0, tc.alpha)
+			result := LogisticThreshold(tc.x, tc.x0, tc.alpha)
 			if !almostEqual(result, tc.expected, 1e-5) {
 				t.Errorf("LogisticThreshold(%v, %v, %v) = %v; want %v", tc.x, tc.x0, tc.alpha, result, tc.expected)
 			}
@@ -54,7 +54,7 @@ func TestHardThreshold(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := cm.HardThreshold(tc.x, tc.x0)
+			result := HardThreshold(tc.x, tc.x0)
 			if result != tc.expected {
 				t.Errorf("HardThreshold(%v, %v) = %v; want %v", tc.x, tc.x0, result, tc.expected)
 			}
@@ -79,7 +79,7 @@ func TestLinearisedThreshold(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := cm.LinearisedThreshold(tc.x, tc.x0, tc.alpha)
+			result := LinearisedThreshold(tc.x, tc.x0, tc.alpha)
 			if !almostEqual(result, tc.expected, 1e-5) {
 				t.Errorf("LinearisedThreshold(%v, %v, %v) = %v; want %v", tc.x, tc.x0, tc.alpha, result, tc.expected)
 			}
@@ -102,7 +102,7 @@ func TestLogisticInterval(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := cm.LogisticInterval(tc.x, tc.a, tc.b, tc.alpha)
+			result := LogisticInterval(tc.x, tc.a, tc.b, tc.alpha)
 			if !almostEqual(result, tc.expected, 1e-5) {
 				t.Errorf("LogisticInterval(%v, %v, %v, %v) = %v; want %v", tc.x, tc.a, tc.b, tc.alpha, result, tc.expected)
 			}
@@ -121,7 +121,7 @@ func TestLerp(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := cm.Lerp(tc.a, tc.b, tc.t)
+			result := Lerp(tc.a, tc.b, tc.t)
 			if !almostEqual(result, tc.expected, 1e-5) {
 				t.Errorf("Lerp(%v, %v, %v) = %v; want %v", tc.a, tc.b, tc.t, result, tc.expected)
 			}
@@ -140,7 +140,7 @@ func TestSumDenseMatrix(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := cm.SumDenseMatrix(tc.testDenseMatrix)
+			result := SumDenseMatrix(tc.testDenseMatrix)
 			if !almostEqual(result, tc.expected, 1e-5) {
 				t.Errorf("SumDenseMatrix(%v) = %v want %v", tc.testDenseMatrix, result, tc.expected)
 			}
@@ -168,53 +168,10 @@ func TestDivideDenseMatrix(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			result := cm.DivideDenseMatrix(tc.testData.matrix, tc.testData.operatorValue)
+			result := DivideDenseMatrix(tc.testData.matrix, tc.testData.operatorValue)
 			if !mat.Equal(result, tc.expected) {
 				t.Errorf("DivideDenseMatrix(%v, %v) = %v want %v", tc.testData.matrix, tc.testData.operatorValue, result, tc.expected)
 			}
 		})
 	}
 }
-
-// func TestElementwiseMultiplyCDenseMatrices(t *testing.T) {
-// 	cases := []struct {
-// 		name     string
-// 		testData DenseMatrixIterationTestCase
-// 		expected *mat.Dense
-// 	}{
-// 		{
-// 			"Dividing a dense matrix",
-// 			DenseMatrixIterationTestCase{matrix: mat.NewDense(1, 2, []float64{1, 2}), operatorValue: 2.0},
-// 			mat.NewDense(1, 2, []float64{0.5, 1}),
-// 		},
-// 	}
-
-// 	for _, tc := range cases {
-// 		t.Run(tc.name, func(t *testing.T) {
-// 			result := cm.DivideDenseMatrix(tc.testData.matrix, tc.testData.operatorValue)
-// 			if !mat.Equal(result, tc.expected) {
-// 				t.Errorf("DivideDenseMatrix(%v, %v) = %v want %v", tc.testData.matrix, tc.testData.operatorValue, result, tc.expected)
-// 			}
-// 		})
-// 	}
-// }
-
-// ElementwiseMultiplyCDenseMatrices multiplies two complex matrices element-wise.
-// func (cm CellMath) ElementwiseMultiplyCDenseMatrices(A, B *mat.CDense) *mat.CDense {
-// 	rA, cA := A.Dims()
-// 	rB, cB := B.Dims()
-// 	if rA != rB || cA != cB {
-// 		panic("ElementwiseMultiplyCDenseMatrices matrices are of different dimensions")
-// 	}
-
-// 	result := mat.NewCDense(rA, cA, nil)
-
-// 	for i := 0; i < rA; i++ {
-// 		for j := 0; j < cA; j++ {
-// 			valA := A.At(i, j)
-// 			valB := B.At(i, j)
-// 			result.Set(i, j, complex(real(valA)*real(valB)-imag(valA)*imag(valB), real(valA)*imag(valB)+imag(valA)*real(valB)))
-// 		}
-// 	}
-// 	return result
-// }
