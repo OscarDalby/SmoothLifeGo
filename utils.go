@@ -4,6 +4,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"sync"
 	"time"
 
 	"github.com/davidkleiven/gosfft/sfft"
@@ -156,16 +157,35 @@ func LogisticIntervalElementWise(x []float64, a float64, b float64, alpha float6
 }
 
 // LogisticThresholdElementWise applies LogisticThreshold to each element of x in a mat.Dense matrix.
+// func LogisticThresholdDenseElementWise(x *mat.Dense, x0 float64, alpha float64) *mat.Dense {
+// 	rows, cols := x.Dims()
+// 	result := mat.NewDense(rows, cols, nil)
+
+// 	for i := 0; i < rows; i++ {
+// 		for j := 0; j < cols; j++ {
+// 			xi := x.At(i, j)
+// 			result.Set(i, j, LogisticThreshold(xi, x0, alpha))
+// 		}
+// 	}
+// 	return result
+// }
+
 func LogisticThresholdDenseElementWise(x *mat.Dense, x0 float64, alpha float64) *mat.Dense {
 	rows, cols := x.Dims()
 	result := mat.NewDense(rows, cols, nil)
 
+	var wg sync.WaitGroup
+	wg.Add(rows)
 	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j++ {
-			xi := x.At(i, j)
-			result.Set(i, j, LogisticThreshold(xi, x0, alpha))
-		}
+		go func(row int) {
+			defer wg.Done()
+			for j := 0; j < cols; j++ {
+				xi := x.At(row, j)
+				result.Set(row, j, LogisticThreshold(xi, x0, alpha))
+			}
+		}(i)
 	}
+	wg.Wait()
 	return result
 }
 
