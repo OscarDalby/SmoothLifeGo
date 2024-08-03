@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"math/rand"
@@ -84,6 +85,8 @@ func Real(complexSlice []complex128) []float64 {
 }
 
 func Randint(low int, high int) int {
+	// return 3
+	fmt.Printf("low: %v, high: %v\n", low, high)
 	return rand.New(rand.NewSource(time.Now().UnixNano())).Intn(high-low) + low
 }
 
@@ -487,4 +490,27 @@ func AddConstantDense(a *mat.Dense, constant float64) *mat.Dense {
 		}
 	}
 	return result
+}
+
+// NormaliseDense uses the Frobenius to normalise a dense matrix
+func NormaliseDense(m *mat.Dense) {
+	r, c := m.Dims()
+	var sumSquares float64
+
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			sumSquares += math.Pow(m.At(i, j), 2)
+		}
+	}
+	norm := math.Sqrt(sumSquares)
+	if norm == 0 {
+		return
+	}
+	normalized := mat.NewDense(r, c, nil)
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			normalized.Set(i, j, m.At(i, j)/norm)
+		}
+	}
+	m.Copy(normalized)
 }

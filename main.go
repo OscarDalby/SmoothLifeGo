@@ -13,8 +13,8 @@ import (
 
 const logres float64 = 0.5
 const radius float64 = 7.0
-const width int = 1 << 9
-const height int = 1 << 9
+const width int = 1 << 7
+const height int = 1 << 7
 const screenWidth = width
 const screenHeight = height
 
