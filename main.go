@@ -67,20 +67,14 @@ func (g *Game) Update() error {
 	newStep := sl.Step()
 	rows, cols := newStep.Dims()
 
-	// state_sum := 0.0
-	real_sum := 0.0
-	// imag_sum := 0.0
-	r, c := newStep.Dims()
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			// state_sum += cmplx.Abs((newStep.At(i, j)))
-			real_sum += real((newStep.At(i, j)))
-			// imag_sum += imag((newStep.At(i, j)))
-		}
-	}
-	// fmt.Printf("state_sum: %v\n", state_sum)
-	fmt.Printf("real_sum: %v\n", int(real_sum))
-	// fmt.Printf("imag_sum: %v\n", imag_sum)
+	// real_sum := 0.0
+	// r, c := newStep.Dims()
+	// for i := 0; i < r; i++ {
+	// 	for j := 0; j < c; j++ {
+	// 		real_sum += real((newStep.At(i, j)))
+	// 	}
+	// }
+	// fmt.Printf("real_sum: %v\n", int(real_sum))
 
 	pix := g.img.Pix
 	for y := 0; y < rows; y++ {

@@ -269,9 +269,20 @@ func Lerp(a, b, t float64) float64 {
 }
 
 // Lerp performs linear interpolation between a and b, where t is a matrix of values between [0,1].
-func LerpDense(a, b float64, t *mat.Dense) *mat.Dense {
+func LerpDense(a float64, b float64, t *mat.Dense) *mat.Dense {
+	// fmt.Printf("LerpDense: t: %v\n", t)
 	r, c := t.Dims()
 	result := mat.NewDense(r, c, nil)
+
+	var tSum float64 = 0
+	rt, ct := t.Dims()
+	for i := 0; i < rt; i++ {
+		for j := 0; j < ct; j++ {
+			tSum += t.At(i, j)
+		}
+	}
+
+	fmt.Printf("tSum: %v\n", tSum)
 
 	t.Apply(func(i, j int, v float64) float64 {
 		if v < 0 || v > 1 {
@@ -281,6 +292,7 @@ func LerpDense(a, b float64, t *mat.Dense) *mat.Dense {
 		return v
 	}, t)
 
+	// this func seems to be returning the same values every time regardless of how t changes, while a and b are constant. Why is that?
 	return result
 }
 
@@ -436,7 +448,7 @@ func LogisticThresholdDenseDoubleElementWise(x, x0 *mat.Dense, alpha float64) *m
 	return result
 }
 
-// LogisticIntervalDense computes the logistic interval using matrices n, a, and b, with a uniform alpha.
+// LogisticIntervalTripleDense computes the logistic interval using matrices n, a, and b, with a uniform alpha.
 func LogisticIntervalTripleDense(n, a, b *mat.Dense, alpha float64) *mat.Dense {
 	nRows, nCols := n.Dims()
 	aRows, aCols := a.Dims()
@@ -465,6 +477,18 @@ func LogisticIntervalTripleDense(n, a, b *mat.Dense, alpha float64) *mat.Dense {
 
 	return result
 }
+
+// def logistic_interval(x, a, b, alpha):
+//     """Logistic function on x between a and b with transition width alpha
+
+//     Very approximately:
+//         x < a     : 0
+//         a < x < b : 1
+//         x > b     : 0
+
+//     AKA snm2D.frag:sigmoid_ab with sigtype==4
+//     """
+//     return logistic_threshold(x, a, alpha) * (1.0 - logistic_threshold(x, b, alpha))
 
 // ConvertDenseToCDense takes a *mat.Dense matrix and converts it to a *mat.CDense matrix.
 func ConvertDenseToCDense(input *mat.Dense) *mat.CDense {
