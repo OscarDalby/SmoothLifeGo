@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"math"
-	"math/cmplx"
 	"math/rand"
 	"time"
 
@@ -19,15 +18,6 @@ type Number interface {
 // almostEqual compares floats with a tolerance
 func almostEqual(a float64, b float64, tolerance float64) bool {
 	return math.Abs(a-b) <= tolerance
-}
-
-// gets e**x for every ele in a slice
-func ExpSlice(values []float64) []float64 {
-	result := make([]float64, len(values))
-	for i, v := range values {
-		result[i] = math.Exp(v)
-	}
-	return result
 }
 
 // Greater does an element wise greater than and returns a slice of bools containing a[i] > b[i]
@@ -84,10 +74,6 @@ func Sum(slice []int) int {
 	return total
 }
 
-func Zeros(length int) []float64 {
-	return make([]float64, length)
-}
-
 func Real(complexSlice []complex128) []float64 {
 	realParts := make([]float64, len(complexSlice))
 	for i, c := range complexSlice {
@@ -96,25 +82,8 @@ func Real(complexSlice []complex128) []float64 {
 	return realParts
 }
 
-func RandomRandint(low, high int) int {
-	src := rand.NewSource(time.Now().UnixNano())
-	rnd := rand.New(src)
-	return rnd.Intn(high-low) + low
-}
-
-func Fft2RealOut(input *mat.CDense, rows, cols int) *mat.Dense {
-	ft := sfft.NewFFT2(rows, cols)
-	ftData := ft.FFT(input.RawCMatrix().Data)
-	ftMat := mat.NewCDense(rows, cols, ftData)
-	sfft.Center2(ftMat)
-
-	amp := mat.NewDense(rows, cols, nil)
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j++ {
-			amp.Set(i, j, cmplx.Abs(ftMat.At(i, j)))
-		}
-	}
-	return amp
+func Randint(low int, high int) int {
+	return rand.New(rand.NewSource(time.Now().UnixNano())).Intn(high-low) + low
 }
 
 func Fft2(input *mat.CDense) *mat.CDense {
@@ -136,14 +105,13 @@ func Fft2(input *mat.CDense) *mat.CDense {
 
 func Fft2RealIn(input *mat.Dense) *mat.CDense {
 	r, c := input.Dims()
-	fft := sfft.NewFFT2(r, c)
 	data := make([]complex128, r*c)
 	for i := 0; i < r; i++ {
 		for j := 0; j < c; j++ {
 			data[i*c+j] = complex(input.At(i, j), 0)
 		}
 	}
-	output := fft.FFT(data)
+	output := sfft.NewFFT2(r, c).FFT(data)
 	return mat.NewCDense(r, c, output)
 }
 
@@ -291,20 +259,6 @@ func LerpDense(a, b float64, t *mat.Dense) *mat.Dense {
 	}, t)
 
 	return result
-}
-
-func MeshGrid(sizeY, sizeX int) (*mat.Dense, *mat.Dense) {
-	yy := mat.NewDense(sizeY, sizeX, nil)
-	xx := mat.NewDense(sizeY, sizeX, nil)
-
-	for i := 0; i < sizeY; i++ {
-		for j := 0; j < sizeX; j++ {
-			yy.Set(i, j, float64(i))
-			xx.Set(i, j, float64(j))
-		}
-	}
-
-	return yy, xx
 }
 
 func AntialiasedCircle(sizeX int, sizeY int, radius float64, roll bool, logres float64) *mat.Dense {
