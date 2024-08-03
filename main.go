@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"log"
 	"math"
@@ -13,8 +14,8 @@ import (
 
 const logres float64 = 0.5
 const radius float64 = 7.0
-const width int = 1 << 7
-const height int = 1 << 7
+const width int = 1 << 9
+const height int = 1 << 9
 const screenWidth = width
 const screenHeight = height
 
@@ -22,7 +23,7 @@ var mp *Multipliers = ConstructMultipliers(radius, width, height, logres)
 
 // var br BasicRules = BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
 // Birth range, survival range, sigmoid widths
-var br BasicRules = BasicRules{B1: 0.1, B2: 0.4, D1: 0.3, D2: 0.6, N: 0.1, M: 0.09}
+var br BasicRules = BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
 var sl *SmoothLife = ConstructSmoothLife(mp, br, width, height)
 
 var game *Game
@@ -47,6 +48,15 @@ var updateTimerStart = 10
 var updateTimer = updateTimerStart
 
 func (g *Game) Update() error {
+	// g.keys = inpututil.AppendPressedKeys(g.keys[:0])
+	// key := g.keys[0]
+	if ebiten.IsKeyPressed(ebiten.KeyQ) {
+		sl.AddSpeckles()
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyW) {
+		fmt.Printf("W pressed\n")
+	}
+
 	if updateTimer > 0 {
 		updateTimer--
 		return nil
@@ -56,6 +66,21 @@ func (g *Game) Update() error {
 	sl.AddSpeckles()
 	newStep := sl.Step()
 	rows, cols := newStep.Dims()
+
+	// state_sum := 0.0
+	real_sum := 0.0
+	// imag_sum := 0.0
+	r, c := newStep.Dims()
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			// state_sum += cmplx.Abs((newStep.At(i, j)))
+			real_sum += real((newStep.At(i, j)))
+			// imag_sum += imag((newStep.At(i, j)))
+		}
+	}
+	// fmt.Printf("state_sum: %v\n", state_sum)
+	fmt.Printf("real_sum: %v\n", int(real_sum))
+	// fmt.Printf("imag_sum: %v\n", imag_sum)
 
 	pix := g.img.Pix
 	for y := 0; y < rows; y++ {
