@@ -14,12 +14,6 @@ func BenchmarkAntialiasedCircle(b *testing.B) {
 	}
 }
 
-func BenchmarkRandint(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		Randint(1, 10)
-	}
-}
-
 func BenchmarkLogisticThresholdDenseElementWise(b *testing.B) {
 	rows, cols := 512, 512
 	data := make([]float64, rows*cols)

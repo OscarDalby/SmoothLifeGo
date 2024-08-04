@@ -4,9 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math"
-	"math/rand"
 	"sync"
-	"time"
 
 	"github.com/davidkleiven/gosfft/sfft"
 	"github.com/mjibson/go-dsp/fft"
@@ -20,72 +18,6 @@ type Number interface {
 // almostEqual compares floats with a tolerance
 func almostEqual(a float64, b float64, tolerance float64) bool {
 	return math.Abs(a-b) <= tolerance
-}
-
-// Greater does an element wise greater than and returns a slice of bools containing a[i] > b[i]
-func Greater(a, b []int) []bool {
-	length := len(a)
-	if len(b) < length {
-		length = len(b)
-	}
-	result := make([]bool, length)
-	for i := 0; i < length; i++ {
-		result[i] = a[i] > b[i]
-	}
-	return result
-}
-
-// Clamps every element in a slice
-func ClampSlice(values []int, min int, max int) []int {
-	clamped := make([]int, len(values))
-	for i, v := range values {
-		if v < min {
-			clamped[i] = min
-		} else if v > max {
-			clamped[i] = max
-		} else {
-			clamped[i] = v
-		}
-	}
-	return clamped
-}
-
-// Gets the sqrt of every element in an array
-func SqrtSlice(slice []float64) []float64 {
-	result := make([]float64, len(slice))
-	for i, val := range slice {
-		result[i] = math.Sqrt(val)
-	}
-	return result
-}
-
-func Roll(slice []int, shift int) []int {
-	n := len(slice)
-	if n == 0 {
-		return slice
-	}
-	shift = ((shift % n) + n) % n
-	return append(slice[n-shift:], slice[:n-shift]...)
-}
-
-func Sum(slice []int) int {
-	total := 0
-	for _, value := range slice {
-		total += value
-	}
-	return total
-}
-
-func Real(complexSlice []complex128) []float64 {
-	realParts := make([]float64, len(complexSlice))
-	for i, c := range complexSlice {
-		realParts[i] = real(c)
-	}
-	return realParts
-}
-
-func Randint(low int, high int) int {
-	return rand.New(rand.NewSource(time.Now().UnixNano())).Intn(high-low) + low
 }
 
 func Fft2(input *mat.CDense) *mat.CDense {
@@ -125,18 +57,6 @@ func LogisticThreshold(x float64, x0 float64, alpha float64) float64 {
 	return 1.0 / (1.0 + math.Exp(-4.0/alpha*(x-x0)))
 }
 
-// LogisticThreshold computes the sigmoid curve of a provided slice, with alpha adjusting
-// the steepness and direction of the transition.
-// Used to smoothly transition from near 0 -> 1 as x moves from left to right past x0, with alpha
-// a parameter to determine how abruptly this change occurs
-func LogisticThresholdElementWise(x []float64, x0 float64, alpha float64) []float64 {
-	result := make([]float64, len(x))
-	for i, x := range x {
-		result[i] = LogisticThreshold(x, x0, alpha)
-	}
-	return result
-}
-
 // Logistic function on x between a and b with transition width alpha
 // ~:
 // x < a		: 0
@@ -145,31 +65,6 @@ func LogisticThresholdElementWise(x []float64, x0 float64, alpha float64) []floa
 func LogisticInterval(x float64, a float64, b float64, alpha float64) float64 {
 	return LogisticThreshold(x, a, alpha) * (1.0 - LogisticThreshold(x, b, alpha))
 }
-
-// LogisticIntervalElementWise computes the LogisticInterval function on a slice of x values between a and b with transition width alpha
-// Element-wise version of LogisticInterval that handles slices of float64.
-// This function is useful for performing vectorized-like operations in scenarios where input x is a sequence of values.
-func LogisticIntervalElementWise(x []float64, a float64, b float64, alpha float64) []float64 {
-	result := make([]float64, len(x))
-	for i, xi := range x {
-		result[i] = LogisticInterval(xi, a, b, alpha)
-	}
-	return result
-}
-
-// LogisticThresholdElementWise applies LogisticThreshold to each element of x in a mat.Dense matrix.
-// func LogisticThresholdDenseElementWise(x *mat.Dense, x0 float64, alpha float64) *mat.Dense {
-// 	rows, cols := x.Dims()
-// 	result := mat.NewDense(rows, cols, nil)
-
-// 	for i := 0; i < rows; i++ {
-// 		for j := 0; j < cols; j++ {
-// 			xi := x.At(i, j)
-// 			result.Set(i, j, LogisticThreshold(xi, x0, alpha))
-// 		}
-// 	}
-// 	return result
-// }
 
 func LogisticThresholdDenseElementWise(x *mat.Dense, x0 float64, alpha float64) *mat.Dense {
 	rows, cols := x.Dims()
@@ -203,6 +98,14 @@ func LogisticIntervalDenseElementWise(x *mat.Dense, a float64, b float64, alpha 
 	}
 	return result
 }
+
+// func LogisticInterval(x float64, a float64, b float64, alpha float64) float64 {
+// 	return LogisticThreshold(x, a, alpha) * (1.0 - LogisticThreshold(x, b, alpha))
+// }
+
+// func LogisticThreshold(x float64, x0 float64, alpha float64) float64 {
+// 	return 1.0 / (1.0 + math.Exp(-4.0/alpha*(x-x0)))
+// }
 
 // Returns if arg1 is greater than arg2
 func HardThreshold(arg1 float64, arg2 float64) bool {

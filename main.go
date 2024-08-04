@@ -24,7 +24,8 @@ var mp *Multipliers = ConstructMultipliers(innerRadius, outerRadius, width, heig
 
 // var br BasicRules = BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
 // Birth range, survival range, sigmoid widths
-var br BasicRules = BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
+// var br BasicRules = BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
+var br BasicRules = BasicRules{B1: 0.200, B2: 0.370, D1: 0.250, D2: 0.500, N: 0.030, M: 0.160}
 var sl *SmoothLife = ConstructSmoothLife(mp, br, width, height)
 
 var game *Game
@@ -66,6 +67,7 @@ func (g *Game) Update() error {
 	}
 	sl.AddSpeckles()
 	newStep := sl.Step()
+	// return nil
 	rows, cols := newStep.Dims()
 
 	real_sum := 0.0
