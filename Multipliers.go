@@ -22,17 +22,21 @@ func ConstructMultipliers(
 ) *Multipliers {
 	inner := AntialiasedCircle(width, height, innerRadius, true, logres)
 	outer := AntialiasedCircle(width, height, outerRadius, true, logres)
+	saveMatrixAsImage(inner, "inner.png")
+	saveMatrixAsImage(outer, "outer.png")
 	annulus := mat.NewDense(height, width, nil)
 	annulus.Sub(outer, inner)
-
-	// check rolling correctly
+	saveMatrixAsImage(annulus, "annulus.png")
 
 	// Scale each kernel so the sum is 1
 	inner_magnitude := SumDenseMatrix(inner)
+
 	annulus_magnitude := SumDenseMatrix(annulus)
 
 	inner = DivideDenseMatrix(inner, inner_magnitude)
+	saveMatrixAsImage(inner, "inner_scaled.png")
 	annulus = DivideDenseMatrix(annulus, annulus_magnitude)
+	saveMatrixAsImage(annulus, "annulus_scaled.png")
 
 	// Precompute the FFT's
 	M := Fft2RealIn(inner)

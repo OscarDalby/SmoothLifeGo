@@ -12,9 +12,9 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-const logres float64 = 0.8
-const innerRadius float64 = 10.0
-const outerRadius float64 = 50.0
+const logres float64 = 0.5
+const innerRadius float64 = 20.0
+const outerRadius float64 = 60.0
 const width int = 1 << 9
 const height int = 1 << 9
 const screenWidth = width
