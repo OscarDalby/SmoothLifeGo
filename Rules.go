@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -36,14 +34,9 @@ func (br BasicRules) S(n *mat.Dense, m *mat.Dense) *mat.Dense {
 	// A fully dead cell will become alive if the neighbor density is between B1 and B2.
 	// A fully alive cell will stay alive if the neighhbor density is between D1 and D2.
 	// Interpolate between the two sets of thresholds depending on how alive/dead the cell is.
+	// {B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
 	threshold1 := LerpDense(br.B1, br.D1, aliveness)
 	threshold2 := LerpDense(br.B2, br.D2, aliveness)
-
-	t1 := threshold1.At(0, 0)
-	t2 := threshold2.At(0, 0)
-
-	fmt.Printf("threshold1: %v\n", t1)
-	fmt.Printf("threshold2: %v\n", t2)
 
 	// Now with the smoothness of `logisticInterval` determine if the neighbor density is
 	// inside of the threshold to stay/become alive.
@@ -57,15 +50,10 @@ func (br BasicRules) S(n *mat.Dense, m *mat.Dense) *mat.Dense {
 		}
 	}
 
-	var alivenessDiff float64 = newAlivenessSum - alivenessSum
-	fmt.Printf("alivenessSum: %v\n", int(alivenessSum))
-	// fmt.Printf("newAliveness: %v\n", newAliveness)
-	// fmt.Printf("newAlivenessSum: %v\n", int(newAlivenessSum))
-	fmt.Printf("alivenessDiff: %v\n", int(alivenessDiff))
+	// var alivenessDiff float64 = newAlivenessSum - alivenessSum
 
 	// boostedAliveness := AddConstantDense(newAliveness, 0.6)
 	// return ClampDense(boostedAliveness, 0, 1)
 	var output *mat.Dense = ClampDense(newAliveness, 0, 1)
-	// fmt.Printf("output: %v\n", output)
 	return output
 }

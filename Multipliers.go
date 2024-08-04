@@ -15,15 +15,17 @@ type Multipliers struct {
 
 func ConstructMultipliers(
 	innerRadius float64,
+	outerRadius float64,
 	width int,
 	height int,
 	logres float64,
 ) *Multipliers {
-	outerRadius := 3 * innerRadius
 	inner := AntialiasedCircle(width, height, innerRadius, true, logres)
 	outer := AntialiasedCircle(width, height, outerRadius, true, logres)
 	annulus := mat.NewDense(height, width, nil)
 	annulus.Sub(outer, inner)
+
+	// check rolling correctly
 
 	// Scale each kernel so the sum is 1
 	inner_magnitude := SumDenseMatrix(inner)

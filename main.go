@@ -12,14 +12,15 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-const logres float64 = 0.5
-const radius float64 = 7.0
+const logres float64 = 0.8
+const innerRadius float64 = 10.0
+const outerRadius float64 = 50.0
 const width int = 1 << 9
 const height int = 1 << 9
 const screenWidth = width
 const screenHeight = height
 
-var mp *Multipliers = ConstructMultipliers(radius, width, height, logres)
+var mp *Multipliers = ConstructMultipliers(innerRadius, outerRadius, width, height, logres)
 
 // var br BasicRules = BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
 // Birth range, survival range, sigmoid widths
@@ -67,14 +68,14 @@ func (g *Game) Update() error {
 	newStep := sl.Step()
 	rows, cols := newStep.Dims()
 
-	// real_sum := 0.0
-	// r, c := newStep.Dims()
-	// for i := 0; i < r; i++ {
-	// 	for j := 0; j < c; j++ {
-	// 		real_sum += real((newStep.At(i, j)))
-	// 	}
-	// }
-	// fmt.Printf("real_sum: %v\n", int(real_sum))
+	real_sum := 0.0
+	r, c := newStep.Dims()
+	for i := 0; i < r; i++ {
+		for j := 0; j < c; j++ {
+			real_sum += real((newStep.At(i, j)))
+		}
+	}
+	fmt.Printf("real_sum: %v\n", int(real_sum))
 
 	pix := g.img.Pix
 	for y := 0; y < rows; y++ {

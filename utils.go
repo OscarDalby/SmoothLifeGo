@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"math/rand"
@@ -85,8 +84,6 @@ func Real(complexSlice []complex128) []float64 {
 }
 
 func Randint(low int, high int) int {
-	// return 3
-	fmt.Printf("low: %v, high: %v\n", low, high)
 	return rand.New(rand.NewSource(time.Now().UnixNano())).Intn(high-low) + low
 }
 
@@ -270,7 +267,6 @@ func Lerp(a, b, t float64) float64 {
 
 // Lerp performs linear interpolation between a and b, where t is a matrix of values between [0,1].
 func LerpDense(a float64, b float64, t *mat.Dense) *mat.Dense {
-	// fmt.Printf("LerpDense: t: %v\n", t)
 	r, c := t.Dims()
 	result := mat.NewDense(r, c, nil)
 
@@ -282,13 +278,12 @@ func LerpDense(a float64, b float64, t *mat.Dense) *mat.Dense {
 		}
 	}
 
-	fmt.Printf("tSum: %v\n", tSum)
-
 	t.Apply(func(i, j int, v float64) float64 {
 		if v < 0 || v > 1 {
 			log.Panicf("LerpDense: t at position (%d, %d) should be in [0,1], got %f", i, j, v)
 		}
-		result.Set(i, j, (1.0-v)*a+v*b)
+		lerpOut := (1.0-v)*a + v*b
+		result.Set(i, j, lerpOut)
 		return v
 	}, t)
 
