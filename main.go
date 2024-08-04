@@ -105,10 +105,18 @@ func main() {
 			log.Fatalf("Error starting server: %s", err)
 		}
 	}()
-	// select {}
+	var err error
+	// endEarly, err := debug() // run any debug functions
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// if endEarly {
+	// 	return
+	// }
+	// main logic below
 	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("SmoothLifeGo")
-	if err := ebiten.RunGame(game); err != nil {
+	if err = ebiten.RunGame(game); err != nil {
 		log.Fatal(err)
 	}
 }
