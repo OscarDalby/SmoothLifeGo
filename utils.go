@@ -6,8 +6,6 @@ import (
 	"math"
 	"sync"
 
-	"github.com/davidkleiven/gosfft/sfft"
-	"github.com/mjibson/go-dsp/fft"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -20,41 +18,12 @@ func almostEqual(a float64, b float64, tolerance float64) bool {
 	return math.Abs(a-b) <= tolerance
 }
 
-func Fft2(input *mat.CDense) *mat.CDense {
-	r, c := input.Dims()
-
-	fft := sfft.NewFFT2(r, c)
-	data := make([]complex128, r*c)
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			var comp complex128 = input.At(i, j)
-			realPart := real(comp)
-			imagPart := imag(comp)
-			data[i*c+j] = complex(realPart, imagPart)
-		}
-	}
-	output := fft.FFT(data)
-	return mat.NewCDense(r, c, output)
-}
-
-func Fft2RealIn(input *mat.Dense) *mat.CDense {
-	r, c := input.Dims()
-	data := make([]complex128, r*c)
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			data[i*c+j] = complex(input.At(i, j), 0)
-		}
-	}
-	output := sfft.NewFFT2(r, c).FFT(data)
-	return mat.NewCDense(r, c, output)
-}
-
 // LogisticThreshold computes the sigmoid curve of a provided x, with alpha adjusting
 // the steepness and direction of the transition.
 // Used to smoothly transition from near 0 -> 1 as x moves from left to right past x0, with alpha
 // a parameter to determine how abruptly this change occurs
 func LogisticThreshold(x float64, x0 float64, alpha float64) float64 {
-	return 1.0 / (1.0 + math.Exp(-4.0/alpha*(x-x0)))
+	return 1.0 / (1.0 + math.Exp(-10.0/(alpha*(x-x0))))
 }
 
 // Logistic function on x between a and b with transition width alpha
@@ -98,6 +67,20 @@ func LogisticIntervalDenseElementWise(x *mat.Dense, a float64, b float64, alpha 
 	}
 	return result
 }
+
+// LogisticIntervalElementWise applies LogisticInterval to each element of x in a mat.Dense matrix.
+// func LogisticIntervalCDenseElementWise(x *mat.CDense, a float64, b float64, alpha float64) *mat.CDense {
+// 	rows, cols := x.Dims()
+// 	result := mat.NewCDense(rows, cols, nil)
+
+// 	for i := 0; i < rows; i++ {
+// 		for j := 0; j < cols; j++ {
+// 			xi := x.At(i, j)
+// 			result.Set(i, j, complex(LogisticInterval(xi, a, b, alpha), 0))
+// 		}
+// 	}
+// 	return result
+// }
 
 // func LogisticInterval(x float64, a float64, b float64, alpha float64) float64 {
 // 	return LogisticThreshold(x, a, alpha) * (1.0 - LogisticThreshold(x, b, alpha))
@@ -305,14 +288,6 @@ func cdenseToSlice(A *mat.CDense) [][]complex128 {
 		}
 	}
 	return result
-}
-
-// ifft2 gets the inverse fast fourier transform of a CDense
-func ifft2(input *mat.CDense) *mat.CDense {
-	inputComplexArr := cdenseToSlice(input)
-	outputComplexArr := fft.IFFT2(inputComplexArr)
-	output := sliceToCDense(outputComplexArr)
-	return output
 }
 
 // RealPartCDenseMatrix gets the real part of a CDense and returns a Dense

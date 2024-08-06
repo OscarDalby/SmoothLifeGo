@@ -39,8 +39,8 @@ func ConstructMultipliers(
 	// saveMatrixAsImage(annulus, "annulus_scaled.png")
 
 	// Precompute the FFT's
-	M := Fft2RealIn(inner)
-	N := Fft2RealIn(annulus)
+	M := fft2dense(inner)
+	N := fft2dense(annulus)
 
 	return &Multipliers{
 		inner:       inner,

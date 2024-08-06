@@ -1,7 +1,7 @@
 package main
 
 import (
-	"math"
+	"fmt"
 	"math/rand"
 	"time"
 
@@ -31,19 +31,22 @@ type SmoothLife struct {
 	field  *mat.CDense
 }
 
-func (sl SmoothLife) Clear() {
+func (sl *SmoothLife) Clear() {
 	sl.field = mat.NewCDense(height, width, nil)
 	sl.field.Zero()
 }
 
-func (sl SmoothLife) Step() *mat.CDense {
-	var newField *mat.CDense = Fft2(sl.field)
+func (sl *SmoothLife) Step() *mat.CDense {
+	fmt.Println("stepping")
+	var newField *mat.CDense = fft2cdense(sl.field)
+
+	printCDenseRealSum(newField, "newField")
 
 	var mBuffer = ElementwiseMultiplyCDenseMatrices(newField, mp.M)
 	var nBuffer = ElementwiseMultiplyCDenseMatrices(newField, mp.N)
 
-	var _mBuffer = ifft2(mBuffer)
-	var _nBuffer = ifft2(nBuffer)
+	var _mBuffer = ifft2cdense(mBuffer)
+	var _nBuffer = ifft2cdense(nBuffer)
 
 	// saveMatrixAsImage(RealPartCDenseMatrix(mBuffer), "mBuffer.png")
 	// saveMatrixAsImage(RealPartCDenseMatrix(nBuffer), "nBuffer.png")
@@ -61,14 +64,16 @@ func (sl SmoothLife) Step() *mat.CDense {
 	var realMBuffer = RealPartCDenseMatrix(_mBuffer)
 	var realNBuffer = RealPartCDenseMatrix(_nBuffer)
 
-	sl.field = ConvertDenseToCDense(sl.rules.S(realNBuffer, realMBuffer))
+	outputField := sl.rules.S(realNBuffer, realMBuffer)
+	sl.field = ConvertDenseToCDense(outputField)
 	return sl.field
 }
 
-func (sl SmoothLife) AddSpeckles() {
+func (sl *SmoothLife) AddSpeckles() {
 	rand.New(rand.NewSource(time.Now().Unix()))
-	var count int = int(float64(width*height) / math.Pow(float64(mp.outerRadius*2), 2))
-	var intensity complex128 = 1.0 + 1i
+	// var count int = int(float64(width*height) / math.Pow(float64(mp.outerRadius*2), 2))
+	var count int = 25
+	var intensity complex128 = 1.0 + 0i
 	for i := 0; i < count; i++ {
 		var radius int = int(mp.outerRadius)
 		row := rand.Intn(height - radius)
@@ -79,4 +84,5 @@ func (sl SmoothLife) AddSpeckles() {
 			}
 		}
 	}
+
 }

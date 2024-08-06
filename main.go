@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 	"log"
 	"math"
@@ -25,7 +24,7 @@ var mp *Multipliers = ConstructMultipliers(innerRadius, outerRadius, width, heig
 // var br BasicRules = BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
 // Birth range, survival range, sigmoid widths
 // var br BasicRules = BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
-var br BasicRules = BasicRules{B1: 0.200, B2: 0.370, D1: 0.250, D2: 0.500, N: 0.030, M: 0.160}
+var br BasicRules = BasicRules{B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
 var sl *SmoothLife = ConstructSmoothLife(mp, br, width, height)
 
 var game *Game
@@ -46,18 +45,11 @@ func init() {
 	game = NewGame(screenWidth, screenHeight, matrix)
 }
 
+var firstRun = true
 var updateTimerStart = 10
 var updateTimer = updateTimerStart
 
 func (g *Game) Update() error {
-	// g.keys = inpututil.AppendPressedKeys(g.keys[:0])
-	// key := g.keys[0]
-	if ebiten.IsKeyPressed(ebiten.KeyQ) {
-		sl.AddSpeckles()
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyW) {
-		fmt.Printf("W pressed\n")
-	}
 
 	if updateTimer > 0 {
 		updateTimer--
@@ -65,19 +57,18 @@ func (g *Game) Update() error {
 	} else {
 		updateTimer = updateTimerStart
 	}
-	sl.AddSpeckles()
+
+	if firstRun {
+		sl.AddSpeckles()
+		firstRun = false
+	}
+
+	printCDenseRealSum(sl.field, "sl.field")
 	newStep := sl.Step()
-	// return nil
+
 	rows, cols := newStep.Dims()
 
-	real_sum := 0.0
-	r, c := newStep.Dims()
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			real_sum += real((newStep.At(i, j)))
-		}
-	}
-	fmt.Printf("real_sum: %v\n", int(real_sum))
+	printCDenseRealSum(newStep, "newStep")
 
 	pix := g.img.Pix
 	for y := 0; y < rows; y++ {
@@ -85,7 +76,7 @@ func (g *Game) Update() error {
 			index := y*g.img.Stride + x*4
 			val := newStep.At(y, x)
 			r, i := real(val), imag(val)
-			intensity := uint8(math.Round(r*32+i*32)) * 2
+			intensity := uint8(math.Round(r*8+i*8)) * 8
 			pix[index], pix[index+1], pix[index+2], pix[index+3] = intensity, intensity, intensity, intensity
 		}
 	}
