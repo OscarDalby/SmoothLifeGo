@@ -6,10 +6,13 @@ import (
 	"math"
 	"net/http"
 	_ "net/http/pprof"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"gonum.org/v1/gonum/mat"
 )
+
+var logger *log.Logger
 
 const logres float64 = 0.5
 const innerRadius float64 = 20.0
@@ -46,7 +49,7 @@ func init() {
 }
 
 var firstRun = true
-var updateTimerStart = 10
+var updateTimerStart = 5
 var updateTimer = updateTimerStart
 
 func (g *Game) Update() error {
@@ -63,18 +66,14 @@ func (g *Game) Update() error {
 		firstRun = false
 	}
 
-	printCDenseRealSum(sl.field, "sl.field")
 	newStep := sl.Step()
 
-	rows, cols := newStep.Dims()
-
-	printCDenseRealSum(newStep, "newStep")
-
 	pix := g.img.Pix
-	for y := 0; y < rows; y++ {
-		for x := 0; x < cols; x++ {
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
 			index := y*g.img.Stride + x*4
 			val := newStep.At(y, x)
+			logger.Printf("val %v\n", val)
 			r, i := real(val), imag(val)
 			intensity := uint8(math.Round(r*8+i*8)) * 8
 			pix[index], pix[index+1], pix[index+2], pix[index+3] = intensity, intensity, intensity, intensity
@@ -92,13 +91,21 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func main() {
+	var err error
+
+	logFile, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal("Error opening log file: ", err)
+	}
+	defer logFile.Close()
+
+	logger = log.New(logFile, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 	go func() {
 		log.Println("Starting server for profiling at http://localhost:6060/debug/pprof/")
 		if err := http.ListenAndServe("localhost:6060", nil); err != nil {
 			log.Fatalf("Error starting server: %s", err)
 		}
 	}()
-	var err error
 	// endEarly, err := debug() // run any debug functions
 	// if err != nil {
 	// 	log.Fatal(err)

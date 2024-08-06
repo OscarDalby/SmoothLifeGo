@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 
@@ -37,30 +36,12 @@ func (sl *SmoothLife) Clear() {
 }
 
 func (sl *SmoothLife) Step() *mat.CDense {
-	fmt.Println("stepping")
 	var newField *mat.CDense = fft2cdense(sl.field)
-
-	printCDenseRealSum(newField, "newField")
 
 	var mBuffer = ElementwiseMultiplyCDenseMatrices(newField, mp.M)
 	var nBuffer = ElementwiseMultiplyCDenseMatrices(newField, mp.N)
-
 	var _mBuffer = ifft2cdense(mBuffer)
 	var _nBuffer = ifft2cdense(nBuffer)
-
-	// saveMatrixAsImage(RealPartCDenseMatrix(mBuffer), "mBuffer.png")
-	// saveMatrixAsImage(RealPartCDenseMatrix(nBuffer), "nBuffer.png")
-	// saveMatrixAsImage(RealPartCDenseMatrix(_mBuffer), "_mBuffer.png")
-	// saveMatrixAsImage(RealPartCDenseMatrix(_nBuffer), "_nBuffer.png")
-	// fmt.Println("mBuffer")
-	// printMatrix(RealPartCDenseMatrix(mBuffer))
-	// fmt.Println("nBuffer")
-	// printMatrix(RealPartCDenseMatrix(nBuffer))
-	// fmt.Println("_mBuffer")
-	// printMatrix(RealPartCDenseMatrix(_mBuffer))
-	// fmt.Println("_nBuffer")
-	// printMatrix(RealPartCDenseMatrix(_nBuffer))
-
 	var realMBuffer = RealPartCDenseMatrix(_mBuffer)
 	var realNBuffer = RealPartCDenseMatrix(_nBuffer)
 
