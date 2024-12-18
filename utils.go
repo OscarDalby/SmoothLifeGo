@@ -206,7 +206,6 @@ func AntialiasedCircle(sizeX int, sizeY int, radius float64, roll bool, logres f
 }
 
 func RollMatrix(input *mat.Dense, shiftY int, shiftX int) *mat.Dense {
-	fmt.Printf("roll called")
 	r, c := input.Dims()
 	output := mat.NewDense(r, c, nil)
 

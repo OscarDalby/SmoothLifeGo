@@ -12,16 +12,6 @@ import (
 	"gonum.org/v1/gonum/mat"
 )
 
-// func printMatrix(m *mat.Dense) {
-// 	r, c := m.Dims()
-// 	for i := 0; i < r; i++ {
-// 		for j := 0; j < c; j++ {
-// 			fmt.Printf("%.2f ", m.At(i, j))
-// 		}
-// 		fmt.Println()
-// 	}
-// }
-
 func cdenseToGrayImage(m *mat.CDense) *image.Gray {
 	r, c := m.Dims()
 
@@ -68,7 +58,6 @@ func saveMatrixAsImage(m *mat.Dense, filename string) {
 	}
 	f, err := os.Create(fmt.Sprintf("debug/%v", filename))
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer f.Close()

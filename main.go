@@ -73,7 +73,6 @@ func (g *Game) Update() error {
 		for x := 0; x < width; x++ {
 			index := y*g.img.Stride + x*4
 			val := newStep.At(y, x)
-			logger.Printf("val %v\n", val)
 			r, i := real(val), imag(val)
 			intensity := uint8(math.Round(r*8+i*8)) * 8
 			pix[index], pix[index+1], pix[index+2], pix[index+3] = intensity, intensity, intensity, intensity

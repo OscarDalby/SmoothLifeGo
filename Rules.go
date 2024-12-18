@@ -22,11 +22,7 @@ func (br BasicRules) S(n *mat.Dense, m *mat.Dense) *mat.Dense {
 	// We transition around 0.5 (0 is fully dead and 1 is fully alive).
 	// The transition width is set by `br.M`
 
-	printDenseSum(m, "m")
-	printDenseSum(n, "n")
 	aliveness := LogisticThresholdDenseElementWise(m, 0.5, br.M)
-
-	printDenseSum(aliveness, "aliveness")
 
 	// A fully dead cell will become alive if the neighbor density is between B1 and B2.
 	// A fully alive cell will stay alive if the neighhbor density is between D1 and D2.
@@ -35,7 +31,6 @@ func (br BasicRules) S(n *mat.Dense, m *mat.Dense) *mat.Dense {
 	threshold1 := LerpDense(br.B1, br.D1, aliveness)
 	threshold2 := LerpDense(br.B2, br.D2, aliveness)
 	newAliveness := LogisticIntervalTripleDense(n, threshold1, threshold2, br.N)
-	printDenseSum(newAliveness, "newAliveness")
 
 	var output *mat.Dense = ClampDense(newAliveness, 0, 1)
 	return output
