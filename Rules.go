@@ -1,5 +1,9 @@
 package main
 
+import (
+	"gonum.org/v1/gonum/mat"
+)
+
 type BasicRules struct {
 	B1 float64
 	B2 float64
@@ -13,18 +17,26 @@ func (BasicRules BasicRules) Clear() {
 }
 
 // State transition function
-func (br BasicRules) S(cm CellMath, n float64, m float64) float64 {
+func (br BasicRules) S(n *mat.Dense, m *mat.Dense) *mat.Dense {
 	// Convert the local cell average `m` to a metric of how alive the local cell is.
 	// We transition around 0.5 (0 is fully dead and 1 is fully alive).
 	// The transition width is set by `br.M`
-	var aliveness = cm.LogisticThreshold(m, 0.5, br.M)
+
+	printDenseSum(m, "m")
+	printDenseSum(n, "n")
+	aliveness := LogisticThresholdDenseElementWise(m, 0.5, br.M)
+
+	printDenseSum(aliveness, "aliveness")
+
 	// A fully dead cell will become alive if the neighbor density is between B1 and B2.
 	// A fully alive cell will stay alive if the neighhbor density is between D1 and D2.
 	// Interpolate between the two sets of thresholds depending on how alive/dead the cell is.
-	var threshold1 float64 = cm.Lerp(br.B1, br.D1, aliveness)
-	var threshold2 float64 = cm.Lerp(br.B2, br.D2, aliveness)
-	// Now with the smoothness of `logisticInterval` determine if the neighbor density is
-	// inside of the threshold to stay/become alive.
-	var newAliveness = cm.LogisticInterval(n, threshold1, threshold2, br.N)
-	return cm.Clamp(newAliveness, 0, 1)
+	// {B1: 0.278, B2: 0.365, D1: 0.267, D2: 0.445, N: 0.028, M: 0.147}
+	threshold1 := LerpDense(br.B1, br.D1, aliveness)
+	threshold2 := LerpDense(br.B2, br.D2, aliveness)
+	newAliveness := LogisticIntervalTripleDense(n, threshold1, threshold2, br.N)
+	printDenseSum(newAliveness, "newAliveness")
+
+	var output *mat.Dense = ClampDense(newAliveness, 0, 1)
+	return output
 }

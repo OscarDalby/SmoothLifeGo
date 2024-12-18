@@ -1,61 +1,53 @@
 package main
 
 import (
-	"math"
-
 	"gonum.org/v1/gonum/mat"
 )
 
-func MeshGrid(sizeY, sizeX int) (*mat.Dense, *mat.Dense) {
-	yy := mat.NewDense(sizeY, sizeX, nil)
-	xx := mat.NewDense(sizeY, sizeX, nil)
-
-	for i := 0; i < sizeY; i++ {
-		for j := 0; j < sizeX; j++ {
-			yy.Set(i, j, float64(i))
-			xx.Set(i, j, float64(j))
-		}
-	}
-
-	return yy, xx
+type Multipliers struct {
+	inner       *mat.Dense
+	outer       *mat.Dense
+	outerRadius float64
+	annulus     *mat.Dense
+	M           *mat.CDense
+	N           *mat.CDense
 }
 
-func AntialiasedCircle(sizeX, sizeY int, radius float64, roll bool, logres float64) *mat.Dense {
-	yy, xx := MeshGrid(sizeY, sizeX)
-	logistic := mat.NewDense(sizeY, sizeX, nil)
+func ConstructMultipliers(
+	innerRadius float64,
+	outerRadius float64,
+	width int,
+	height int,
+	logres float64,
+) *Multipliers {
+	inner := AntialiasedCircle(width, height, innerRadius, true, logres)
+	outer := AntialiasedCircle(width, height, outerRadius, true, logres)
+	// saveMatrixAsImage(inner, "inner.png")
+	// saveMatrixAsImage(outer, "outer.png")
+	annulus := mat.NewDense(height, width, nil)
+	annulus.Sub(outer, inner)
+	// saveMatrixAsImage(annulus, "annulus.png")
 
-	if logres == 0 {
-		logres = math.Log2(math.Min(float64(sizeX), float64(sizeY)))
+	// Scale each kernel so the sum is 1
+	inner_magnitude := SumDenseMatrix(inner)
+
+	annulus_magnitude := SumDenseMatrix(annulus)
+
+	inner = DivideDenseMatrix(inner, inner_magnitude)
+	// saveMatrixAsImage(inner, "inner_scaled.png")
+	annulus = DivideDenseMatrix(annulus, annulus_magnitude)
+	// saveMatrixAsImage(annulus, "annulus_scaled.png")
+
+	// Precompute the FFT's
+	M := fft2dense(inner)
+	N := fft2dense(annulus)
+
+	return &Multipliers{
+		inner:       inner,
+		outer:       outer,
+		outerRadius: outerRadius,
+		annulus:     annulus,
+		M:           M,
+		N:           N,
 	}
-
-	for i := 0; i < sizeY; i++ {
-		for j := 0; j < sizeX; j++ {
-			x := float64(xx.At(i, j)) - float64(sizeX)/2
-			y := float64(yy.At(i, j)) - float64(sizeY)/2
-			r := math.Sqrt(x*x + y*y)
-			expValue := logres * (r - radius)
-			logistic.Set(i, j, 1/(1+math.Exp(expValue)))
-		}
-	}
-
-	if roll {
-		logistic = rollMatrix(logistic, sizeY/2, sizeX/2)
-	}
-
-	return logistic
-}
-
-func rollMatrix(input *mat.Dense, shiftY, shiftX int) *mat.Dense {
-	r, c := input.Dims()
-	output := mat.NewDense(r, c, nil)
-
-	for i := 0; i < r; i++ {
-		for j := 0; j < c; j++ {
-			newI := (i + shiftY) % r
-			newJ := (j + shiftX) % c
-			output.Set(newI, newJ, input.At(i, j))
-		}
-	}
-
-	return output
 }
